@@ -760,9 +760,9 @@ export function getEmployeesForDateAndShifts(
     const shiftData = dayData[shiftKey];
     
     if (shiftData) {
-      combinedData.main.push(...shiftData.main);
-      combinedData.northWest.push(...shiftData.northWest);
-      combinedData.south.push(...shiftData.south);
+      combinedData.main.push(...shiftData.main.map(employee => ({ ...employee, shiftId })));
+      combinedData.northWest.push(...shiftData.northWest.map(employee => ({ ...employee, shiftId })));
+      combinedData.south.push(...shiftData.south.map(employee => ({ ...employee, shiftId })));
     }
   });
 

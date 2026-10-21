@@ -10,7 +10,7 @@ export function OperatorStatusDropdown({ selectedStatuses, onStatusChange }: {
 }) {
   const all = selectedStatuses.length === options.length;
   const label = all ? "All statuses" : selectedStatuses.length === 0 ? "No statuses" : selectedStatuses.length === 1 ? options.find(o => o.value === selectedStatuses[0])?.label : `${selectedStatuses.length} statuses`;
-  return <DropdownMenu><DropdownMenuTrigger asChild>
+  return <DropdownMenu modal={false}><DropdownMenuTrigger asChild>
     <button className="secondary-action status-filter"><SlidersHorizontal size={17} aria-hidden="true" />{label}<ChevronDown size={16} aria-hidden="true" /></button>
   </DropdownMenuTrigger><DropdownMenuContent className="status-menu" align="end" sideOffset={8}>
     <DropdownMenuCheckboxItem checked={all} onSelect={e => e.preventDefault()} onCheckedChange={() => onStatusChange(all ? [] : options.map(o => o.value))}>All statuses</DropdownMenuCheckboxItem>

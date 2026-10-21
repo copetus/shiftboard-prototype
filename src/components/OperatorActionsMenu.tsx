@@ -37,7 +37,7 @@ function CancelIcon() {
 
 export function OperatorActionsMenu({ onReassign, onCancel }: OperatorActionsMenuProps) {
   return (
-    <div className="bg-white box-border content-stretch flex flex-col items-start px-0 py-[4px] rounded-[8px] shadow-[0px_2px_12px_0px_#dcdcdd] w-[280px]">
+    <div className="operator-actions-menu bg-white box-border content-stretch flex flex-col items-start px-0 py-[4px] rounded-[8px] shadow-[0px_2px_12px_0px_#dcdcdd] w-[280px]">
       {/* Reassign Duty List(s) */}
       <button
         onClick={onReassign}

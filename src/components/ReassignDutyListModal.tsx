@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import svgPaths from "../imports/svg-u5xad0q8n7";
+import { X } from "lucide-react";
 import modalSvgPaths from "../imports/svg-q8w1b094n6";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 
@@ -141,19 +141,15 @@ export function ReassignDutyListModal({ open, onOpenChange, dutyLists, operatorN
           <button
             onClick={handleCancel}
             aria-label="Close dialog"
-            className="absolute overflow-clip right-[24px] size-[32px] top-[16px] z-[4] cursor-pointer hover:opacity-80 transition-opacity"
+            className="duty-dialog-close icon-action absolute z-[4]"
           >
-            <div className="absolute inset-[20.833%]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 19 19">
-                <path d={modalSvgPaths.p2e824380} fill="#282E38" />
-              </svg>
-            </div>
+            <X size={16} aria-hidden="true" />
           </button>
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto px-[24px]">
             <div className="flex flex-col gap-[32px]">
-                <p className="font-['DM_Sans'] font-bold leading-[normal] min-w-full relative shrink-0 text-[#282e38] text-[24px] w-[min-content]" style={{ fontVariationSettings: "'opsz' 14" }}>
+                <p className="duty-dialog-heading font-['DM_Sans'] font-bold leading-[normal] min-w-full relative shrink-0 text-[#282e38] text-[24px] w-[min-content]" style={{ fontVariationSettings: "'opsz' 14" }}>
                   Reassign Duty List(s)
                 </p>
 
@@ -180,7 +176,7 @@ export function ReassignDutyListModal({ open, onOpenChange, dutyLists, operatorN
                               <div className="content-stretch flex gap-[16px] items-start relative shrink-0 w-full">
                                 {isSelected ? <CheckedCheckbox /> : <UncheckedCheckbox />}
                                 
-                                <div className="basis-0 content-stretch flex gap-[48px] grow items-start min-h-px min-w-px relative shrink-0">
+                                <div className="duty-item-details basis-0 content-stretch flex gap-[48px] grow items-start min-h-px min-w-px relative shrink-0">
                                   <div className="basis-0 content-stretch flex flex-col gap-[4px] grow items-start leading-[normal] max-w-[400px] min-h-px min-w-[300px] relative shrink-0">
                                     <p className={`font-['DM_Sans'] font-bold relative shrink-0 text-[24px] w-full ${isSelected ? 'text-[#003396]' : 'text-[#282e38]'}`} style={{ fontVariationSettings: "'opsz' 14" }}>
                                       {dutyList}
@@ -278,7 +274,7 @@ export function ReassignDutyListModal({ open, onOpenChange, dutyLists, operatorN
           <div className="relative shrink-0 w-full">
             <div aria-hidden="true" className="absolute border-[#cccfd4] border-[1px_0px_0px] border-solid inset-0 pointer-events-none" />
             <div className="size-full">
-              <div className="box-border content-start flex flex-wrap gap-[20px] isolate items-start pb-0 pt-[24px] px-[24px] relative w-full">
+              <div className="duty-dialog-actions box-border content-start flex flex-wrap gap-[20px] isolate items-start pb-0 pt-[24px] px-[24px] relative w-full">
                 <button
                   type="button"
                   onClick={handleCancel}

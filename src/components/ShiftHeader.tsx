@@ -107,7 +107,7 @@ export function ShiftHeader({ onNewTask, onDateShiftChange, onShiftRemove, curre
     <>
       <header className="shift-header">
         <div className="page-heading">
-          <div><span className="eyebrow">Operations / Tasks</span><h1>Shift Board</h1><p>Keep your team in view and your shift on track.</p></div>
+          <div><h1>Shift Board</h1></div>
           <button onClick={onNewTask} className="primary-action"><Plus size={18} aria-hidden="true" />New Task</button>
         </div>
         <div className="shift-controls">
@@ -117,7 +117,7 @@ export function ShiftHeader({ onNewTask, onDateShiftChange, onShiftRemove, curre
               <span>{getShiftLabel(shiftId)}</span>
               {currentShifts.length > 1 && <button onClick={e => handleShiftRemoveClick(e, shiftId)} className="icon-action" aria-label={`Remove ${getShiftLabel(shiftId)}`}><X size={16} aria-hidden="true" /></button>}
             </div>)}
-            <button onClick={handleOpenShiftModal} className="secondary-action" aria-label="Edit selected shifts"><Plus size={18} aria-hidden="true" /><span>Shifts</span></button>
+            <button onClick={handleOpenShiftModal} className="shift-chip add-shift-button" aria-label="Add shift" title="Add shift"><Plus size={18} aria-hidden="true" /></button>
           </div>
         </div>
       </header>

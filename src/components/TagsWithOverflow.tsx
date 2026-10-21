@@ -22,7 +22,7 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
       }
 
       const containerWidth = containerRef.current.offsetWidth;
-      const gap = 8; // Gap between tags
+      const gap = 6; // Gap between tags
       const overflowBadgeWidth = 60; // Approximate width of +N badge
 
       // Get all tag elements from the hidden measurement container
@@ -64,10 +64,7 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
         }
       }
 
-      // Ensure at least one tag is visible if we have tags
-      if (count === 0 && tags.length > 0) {
-        count = 1;
-      }
+
 
       setVisibleCount(count);
     };
@@ -98,14 +95,14 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
       {/* Hidden measurement container - rendered off-screen to measure tag widths */}
       <div
         ref={measureRef}
-        className="fixed opacity-0 pointer-events-none flex gap-[8px] items-center"
+        className="duty-tag-measure fixed opacity-0 pointer-events-none flex gap-[8px] items-center"
         style={{ top: -9999, left: -9999 }}
         aria-hidden="true"
       >
         {tags.map((tag, index) => (
           <div
             key={index}
-            className="bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] whitespace-nowrap"
+            className="duty-tag bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] whitespace-nowrap"
           >
             <p className="font-['DM_Sans'] font-semibold text-[#282e38] text-[16px]" style={{ fontVariationSettings: "'opsz' 14" }}>
               {tag}
@@ -115,11 +112,11 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
       </div>
 
       {/* Actual visible container */}
-      <div ref={containerRef} className="flex gap-[8px] items-center w-full overflow-hidden">
+      <div ref={containerRef} className="duty-tag-row flex gap-[8px] items-center w-full">
         {visibleTags.map((tag, index) => (
           <div
             key={index}
-            className="bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] shrink-0"
+            className="duty-tag bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] shrink-0"
           >
             <p className="font-['DM_Sans'] font-semibold text-[#282e38] text-[16px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
               {tag}
@@ -131,9 +128,8 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
               <button
-                className="bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] hover:bg-[#eceef0] transition-colors shrink-0"
-                onMouseEnter={() => setIsOpen(true)}
-                onMouseLeave={() => setIsOpen(false)}
+                className="duty-tag bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] hover:bg-[#eceef0] transition-colors shrink-0"
+                aria-label={`Show ${overflowCount} more duty lists`}
               >
                 <p className="font-['DM_Sans'] font-semibold text-[#282e38] text-[16px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
                   +{overflowCount}
@@ -143,14 +139,13 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
             <PopoverContent
               className="w-auto max-w-[320px] p-0 bg-white rounded-[8px] border border-[#d9dbde] shadow-[0px_1px_3px_0px_#c0c1c3,0px_0px_1px_0px_#9a9ca0]"
               align="start"
-              onMouseEnter={() => setIsOpen(true)}
-              onMouseLeave={() => setIsOpen(false)}
+
             >
               <div className="box-border flex flex-wrap gap-[12px] items-start p-[12px]">
                 {hiddenTags.map((tag, index) => (
                   <div
                     key={index}
-                    className="bg-[#f7f8f9] box-border relative flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] shrink-0"
+                    className="duty-tag bg-[#f7f8f9] box-border relative flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] shrink-0"
                   >
                     <div aria-hidden="true" className="absolute border border-[#cccfd4] border-solid inset-0 pointer-events-none rounded-[6px]" />
                     <div className="flex flex-col font-['DM_Sans'] font-semibold justify-center leading-[0] relative shrink-0 text-[#282e38] text-[16px] text-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
