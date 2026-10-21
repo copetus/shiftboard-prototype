@@ -109,6 +109,16 @@ export default function App() {
     setSelectedStatuses(statuses);
   };
 
+  const handleAssignTasks = (employeeName: string, area: "main" | "northWest" | "south", shiftId: string | undefined, tasks: string[]) => {
+    setEmployeeData(previous => ({
+      ...previous,
+      [area]: previous[area].map(employee => employee.name === employeeName && employee.shiftId === shiftId
+        ? { ...employee, additionalTags: [...new Set([...(employee.additionalTags || []), ...tasks])] }
+        : employee),
+    }));
+    toast.success(`Assigned ${tasks.length} ${tasks.length === 1 ? "task" : "tasks"} to ${employeeName}`, { description: tasks.join(", ") });
+  };
+
   const handleCancelDutyLists = (employeeName: string, area: "main" | "northWest" | "south", tagsToRemove: string[]) => {
     setEmployeeData((prevData) => {
       const updateEmployee = (employee: EmployeeTaskData): EmployeeTaskData => {
@@ -296,6 +306,7 @@ export default function App() {
                                 employee={employee} 
                                 isToday={isToday}
                                 area="main"
+                                onAssignTasks={handleAssignTasks}
                                 onCancelDutyLists={handleCancelDutyLists}
                               />
                             ))}
@@ -317,6 +328,7 @@ export default function App() {
                                 employee={employee} 
                                 isToday={isToday}
                                 area="northWest"
+                                onAssignTasks={handleAssignTasks}
                                 onCancelDutyLists={handleCancelDutyLists}
                               />
                             ))}
@@ -338,6 +350,7 @@ export default function App() {
                                 employee={employee} 
                                 isToday={isToday}
                                 area="south"
+                                onAssignTasks={handleAssignTasks}
                                 onCancelDutyLists={handleCancelDutyLists}
                               />
                             ))}

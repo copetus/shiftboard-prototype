@@ -1,6 +1,8 @@
+import { ClipboardPlus } from "lucide-react";
 import svgPaths from "../imports/svg-r48d9qwdqb";
 
 interface OperatorActionsMenuProps {
+  onAssign?: () => void;
   onReassign?: () => void;
   onCancel?: () => void;
 }
@@ -35,9 +37,13 @@ function CancelIcon() {
   );
 }
 
-export function OperatorActionsMenu({ onReassign, onCancel }: OperatorActionsMenuProps) {
+export function OperatorActionsMenu({ onAssign, onReassign, onCancel }: OperatorActionsMenuProps) {
   return (
     <div className="operator-actions-menu bg-white box-border content-stretch flex flex-col items-start px-0 py-[4px] rounded-[8px] shadow-[0px_2px_12px_0px_#dcdcdd] w-[280px]">
+      <button type="button" onClick={onAssign} className="operator-assign-action">
+        <ClipboardPlus size={16} aria-hidden="true" />
+        <p>Assign tasks</p>
+      </button>
       {/* Reassign Duty List(s) */}
       <button
         onClick={onReassign}

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MapPin, MoreVertical, Coffee, Sandwich } from "lucide-react";
+import { AssignTaskPanel } from "./AssignTaskPanel";
 import { TagsWithOverflow } from "./TagsWithOverflow";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { OperatorActionsMenu } from "./OperatorActionsMenu";
@@ -25,6 +26,7 @@ interface EmployeeTaskCardProps {
   employee: EmployeeTaskData;
   isToday?: boolean;
   area?: "main" | "northWest" | "south";
+  onAssignTasks: (employeeName: string, area: "main" | "northWest" | "south", shiftId: string | undefined, tasks: string[]) => void;
   onCancelDutyLists?: (employeeName: string, area: "main" | "northWest" | "south", tagsToRemove: string[]) => void;
 }
 
@@ -51,7 +53,9 @@ const workStatusConfig = {
   },
 };
 
-export function EmployeeTaskCard({ employee, isToday = true, area = "main", onCancelDutyLists }: EmployeeTaskCardProps) {
+export function EmployeeTaskCard({ employee, isToday = true, area = "main", onCancelDutyLists, onAssignTasks }: EmployeeTaskCardProps) {
+  const actionTriggerRef = useRef<HTMLButtonElement>(null);
+  const [assignPanelOpen, setAssignPanelOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
@@ -130,12 +134,12 @@ export function EmployeeTaskCard({ employee, isToday = true, area = "main", onCa
         <span>{shiftLabel}</span>
         <Popover open={menuOpen} onOpenChange={setMenuOpen}>
           <PopoverTrigger asChild>
-            <button className="icon-action" aria-label={`Actions for ${employee.name}`}>
+            <button ref={actionTriggerRef} className="icon-action" aria-label={`Actions for ${employee.name}`}>
               <MoreVertical size={17} aria-hidden="true" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 border-0 shadow-none" align="end" sideOffset={5}>
-            <OperatorActionsMenu onReassign={handleReassign} onCancel={handleCancel} />
+            <OperatorActionsMenu onAssign={() => { setMenuOpen(false); setAssignPanelOpen(true); }} onReassign={handleReassign} onCancel={handleCancel} />
           </PopoverContent>
         </Popover>
       </div>
@@ -169,6 +173,8 @@ export function EmployeeTaskCard({ employee, isToday = true, area = "main", onCa
           {allTags.length > 0 ? <TagsWithOverflow tags={allTags} /> : <span className="no-assignments">No duty lists assigned</span>}
         </div>
       </div>
+
+      <AssignTaskPanel open={assignPanelOpen} onOpenChange={setAssignPanelOpen} operatorName={employee.name} role={employee.role} location={employee.location} shiftId={employee.shiftId} assignedTasks={allTags} onAssign={tasks => onAssignTasks(employee.name, area, employee.shiftId, tasks)} onCloseFocus={() => actionTriggerRef.current?.focus()} />
 
       {/* Cancel Duty List Modal */}
       <CancelDutyListModal
