@@ -2985,3 +2985,7 @@ button:disabled { cursor: not-allowed; }
 
 .assign-task-option.assigned-task-option { cursor: default; }
 .assign-task-option.assigned-task-option:hover { background: #f7f8fa; }
+
+.assignment-sheet-overlay { position: fixed; inset: 0; z-index: 50; background: #13243f66; }
+[data-slot="sheet-content"].assign-task-panel { z-index: 50; display: flex; flex-direction: column; box-shadow: -12px 0 40px #10213b1a; }
+.assign-task-panel > button { position: absolute; }

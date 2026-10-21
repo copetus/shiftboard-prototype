@@ -1,3 +1,4 @@
+import type { TaskAssignment } from "../lib/assignOperatorTasks";
 import { useRef, useState } from "react";
 import { MapPin, MoreVertical, Coffee, Sandwich } from "lucide-react";
 import { AssignTaskPanel } from "./AssignTaskPanel";
@@ -8,6 +9,7 @@ import { CancelDutyListModal } from "./CancelDutyListModal";
 import { ReassignDutyListModal } from "./ReassignDutyListModal";
 
 export interface EmployeeTaskData {
+  estimatedWorkMinutes?: number;
   shiftId?: string;
   name: string;
   role: string;
@@ -26,7 +28,7 @@ interface EmployeeTaskCardProps {
   employee: EmployeeTaskData;
   isToday?: boolean;
   area?: "main" | "northWest" | "south";
-  onAssignTasks: (employeeName: string, area: "main" | "northWest" | "south", shiftId: string | undefined, tasks: string[]) => void;
+  onAssignTasks: (employeeName: string, area: "main" | "northWest" | "south", shiftId: string | undefined, tasks: TaskAssignment[]) => void;
   onCancelDutyLists?: (employeeName: string, area: "main" | "northWest" | "south", tagsToRemove: string[]) => void;
 }
 

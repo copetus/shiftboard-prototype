@@ -1,16 +1,18 @@
+import type { TaskAssignment } from "../lib/assignOperatorTasks";
 import { useEffect, useId, useState } from "react";
+import { AssignmentSheetContent } from "./AssignmentSheetContent";
 import { ArrowDownWideNarrow, Search } from "lucide-react";
-import { Sheet, SheetContent, SheetTitle, SheetDescription } from "./ui/sheet";
+import { Sheet, SheetTitle, SheetDescription } from "./ui/sheet";
 
 // Sample assignment inventory for the prototype.
 const tasks = [
-  { id: "task-101", name: "Lab cleaning", location: "Main Building · Lab 104", requestedTime: "8:10 AM", requestedAt: "08:10", shift: "shift1" },
-  { id: "task-102", name: "Pharmacy cleaning", location: "Main Building · Pharmacy 112", requestedTime: "8:25 AM", requestedAt: "08:25", shift: "shift1" },
-  { id: "task-103", name: "Cardiology exam room cleaning", location: "Heart Center · Room 208", requestedTime: "8:40 AM", requestedAt: "08:40", shift: "shift1" },
-  { id: "task-104", name: "Patient room discharge cleaning", location: "North Wing · Room 315", requestedTime: "3:35 PM", requestedAt: "15:35", shift: "shift2" },
-  { id: "task-105", name: "Pulmonary clinic cleaning", location: "Outpatient Center · Room 126", requestedTime: "9:05 AM", requestedAt: "09:05", shift: "shift1" },
-  { id: "task-106", name: "Clinical office cleaning", location: "South Wing · Office 204", requestedTime: "4:15 PM", requestedAt: "16:15", shift: "shift2" },
-  { id: "task-107", name: "Waiting area floor cleaning", location: "Emergency Department · Main lobby", requestedTime: "10:30 PM", requestedAt: "22:30", shift: "shift3" },
+  { id: "task-101", estimatedMinutes: 35, name: "Lab cleaning", location: "Main Building · Lab 104", requestedTime: "8:10 AM", requestedAt: "08:10", shift: "shift1" },
+  { id: "task-102", estimatedMinutes: 25, name: "Pharmacy cleaning", location: "Main Building · Pharmacy 112", requestedTime: "8:25 AM", requestedAt: "08:25", shift: "shift1" },
+  { id: "task-103", estimatedMinutes: 30, name: "Cardiology exam room cleaning", location: "Heart Center · Room 208", requestedTime: "8:40 AM", requestedAt: "08:40", shift: "shift1" },
+  { id: "task-104", estimatedMinutes: 45, name: "Patient room discharge cleaning", location: "North Wing · Room 315", requestedTime: "3:35 PM", requestedAt: "15:35", shift: "shift2" },
+  { id: "task-105", estimatedMinutes: 30, name: "Pulmonary clinic cleaning", location: "Outpatient Center · Room 126", requestedTime: "9:05 AM", requestedAt: "09:05", shift: "shift1" },
+  { id: "task-106", estimatedMinutes: 20, name: "Clinical office cleaning", location: "South Wing · Office 204", requestedTime: "4:15 PM", requestedAt: "16:15", shift: "shift2" },
+  { id: "task-107", estimatedMinutes: 40, name: "Waiting area floor cleaning", location: "Emergency Department · Main lobby", requestedTime: "10:30 PM", requestedAt: "22:30", shift: "shift3" },
 ];
 
 interface AssignTaskPanelProps {
@@ -21,7 +23,7 @@ interface AssignTaskPanelProps {
   location: string;
   shiftId?: string;
   assignedTasks: string[];
-  onAssign: (tasks: string[]) => void;
+  onAssign: (tasks: TaskAssignment[]) => void;
   onCloseFocus: () => void;
 }
 
@@ -45,12 +47,12 @@ export function AssignTaskPanel({ open, onOpenChange, operatorName, role, locati
   const toggle = (id: string) => setSelected(previous => previous.includes(id) ? previous.filter(value => value !== id) : [...previous, id]);
   const assign = () => {
     if (!chosen.length) return;
-    onAssign(chosen.map(task => task.name));
+    onAssign(chosen.map(({ name, estimatedMinutes }) => ({ name, estimatedMinutes })));
     onOpenChange(false);
   };
 
   return <Sheet open={open} onOpenChange={onOpenChange}>
-    <SheetContent side="right" className="assign-task-panel" onCloseAutoFocus={event => { event.preventDefault(); onCloseFocus(); }}>
+    <AssignmentSheetContent open={open} className="assign-task-panel" onCloseAutoFocus={event => { event.preventDefault(); onCloseFocus(); }}>
       <header className="assign-task-panel-header">
         <SheetTitle>Assign task</SheetTitle>
         <SheetDescription>Select tasks for {operatorName}.</SheetDescription>
@@ -93,6 +95,6 @@ export function AssignTaskPanel({ open, onOpenChange, operatorName, role, locati
         <p aria-live="polite">{chosen.length ? `${chosen.length} ${chosen.length === 1 ? "task" : "tasks"} selected` : "Select tasks to assign"}</p>
         <button type="button" className="primary-action" disabled={!chosen.length} onClick={assign}>Assign now</button>
       </footer>}
-    </SheetContent>
+    </AssignmentSheetContent>
   </Sheet>;
 }

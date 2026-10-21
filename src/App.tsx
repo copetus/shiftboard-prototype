@@ -1,3 +1,4 @@
+import { assignOperatorTasks, type TaskAssignment } from "./lib/assignOperatorTasks";
 import { useState, useEffect } from "react";
 import { TopNav } from "./components/TopNav";
 import { SideNavigation } from "./components/SideNavigation";
@@ -109,14 +110,14 @@ export default function App() {
     setSelectedStatuses(statuses);
   };
 
-  const handleAssignTasks = (employeeName: string, area: "main" | "northWest" | "south", shiftId: string | undefined, tasks: string[]) => {
+  const handleAssignTasks = (employeeName: string, area: "main" | "northWest" | "south", shiftId: string | undefined, tasks: TaskAssignment[]) => {
     setEmployeeData(previous => ({
       ...previous,
       [area]: previous[area].map(employee => employee.name === employeeName && employee.shiftId === shiftId
-        ? { ...employee, additionalTags: [...new Set([...(employee.additionalTags || []), ...tasks])] }
+        ? assignOperatorTasks(employee, tasks)
         : employee),
     }));
-    toast.success(`Assigned ${tasks.length} ${tasks.length === 1 ? "task" : "tasks"} to ${employeeName}`, { description: tasks.join(", ") });
+    toast.success(`Assigned ${tasks.length} ${tasks.length === 1 ? "task" : "tasks"} to ${employeeName}`, { description: tasks.map(task => task.name).join(", ") });
   };
 
   const handleCancelDutyLists = (employeeName: string, area: "main" | "northWest" | "south", tagsToRemove: string[]) => {
