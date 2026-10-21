@@ -1,0 +1,168 @@
+import { useState, useRef, useEffect } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "./ui/popover";
+
+interface TagsWithOverflowProps {
+  tags: string[];
+}
+
+export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(tags.length);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const calculateVisibleTags = () => {
+      if (!containerRef.current || !measureRef.current || tags.length === 0) {
+        return;
+      }
+
+      const containerWidth = containerRef.current.offsetWidth;
+      const gap = 8; // Gap between tags
+      const overflowBadgeWidth = 60; // Approximate width of +N badge
+
+      // Get all tag elements from the hidden measurement container
+      const tagElements = Array.from(measureRef.current.children) as HTMLElement[];
+      
+      let totalWidth = 0;
+      let count = 0;
+
+      // Try to fit all tags first
+      for (let i = 0; i < tagElements.length; i++) {
+        const tagWidth = tagElements[i].offsetWidth;
+        const widthWithGap = totalWidth + tagWidth + (i > 0 ? gap : 0);
+        
+        if (widthWithGap <= containerWidth) {
+          totalWidth = widthWithGap;
+          count++;
+        } else {
+          break;
+        }
+      }
+
+      // If not all tags fit, reserve space for the +N badge
+      if (count < tags.length) {
+        totalWidth = 0;
+        count = 0;
+        
+        for (let i = 0; i < tagElements.length; i++) {
+          const tagWidth = tagElements[i].offsetWidth;
+          const widthWithGap = totalWidth + tagWidth + (i > 0 ? gap : 0);
+          const needsOverflowBadge = i < tagElements.length - 1;
+          const totalNeeded = widthWithGap + (needsOverflowBadge ? gap + overflowBadgeWidth : 0);
+          
+          if (totalNeeded <= containerWidth) {
+            totalWidth = widthWithGap;
+            count++;
+          } else {
+            break;
+          }
+        }
+      }
+
+      // Ensure at least one tag is visible if we have tags
+      if (count === 0 && tags.length > 0) {
+        count = 1;
+      }
+
+      setVisibleCount(count);
+    };
+
+    // Initial calculation
+    calculateVisibleTags();
+
+    // Recalculate on resize
+    const resizeObserver = new ResizeObserver(() => {
+      calculateVisibleTags();
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [tags]);
+
+  const visibleTags = tags.slice(0, visibleCount);
+  const hiddenTags = tags.slice(visibleCount);
+  const overflowCount = hiddenTags.length;
+
+  return (
+    <>
+      {/* Hidden measurement container - rendered off-screen to measure tag widths */}
+      <div
+        ref={measureRef}
+        className="fixed opacity-0 pointer-events-none flex gap-[8px] items-center"
+        style={{ top: -9999, left: -9999 }}
+        aria-hidden="true"
+      >
+        {tags.map((tag, index) => (
+          <div
+            key={index}
+            className="bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] whitespace-nowrap"
+          >
+            <p className="font-['DM_Sans'] font-semibold text-[#282e38] text-[16px]" style={{ fontVariationSettings: "'opsz' 14" }}>
+              {tag}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Actual visible container */}
+      <div ref={containerRef} className="flex gap-[8px] items-center w-full overflow-hidden">
+        {visibleTags.map((tag, index) => (
+          <div
+            key={index}
+            className="bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] shrink-0"
+          >
+            <p className="font-['DM_Sans'] font-semibold text-[#282e38] text-[16px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
+              {tag}
+            </p>
+          </div>
+        ))}
+
+        {overflowCount > 0 && (
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className="bg-[#f7f8f9] box-border flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] border border-[#cccfd4] hover:bg-[#eceef0] transition-colors shrink-0"
+                onMouseEnter={() => setIsOpen(true)}
+                onMouseLeave={() => setIsOpen(false)}
+              >
+                <p className="font-['DM_Sans'] font-semibold text-[#282e38] text-[16px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
+                  +{overflowCount}
+                </p>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto max-w-[320px] p-0 bg-white rounded-[8px] border border-[#d9dbde] shadow-[0px_1px_3px_0px_#c0c1c3,0px_0px_1px_0px_#9a9ca0]"
+              align="start"
+              onMouseEnter={() => setIsOpen(true)}
+              onMouseLeave={() => setIsOpen(false)}
+            >
+              <div className="box-border flex flex-wrap gap-[12px] items-start p-[12px]">
+                {hiddenTags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className="bg-[#f7f8f9] box-border relative flex gap-[4px] items-center justify-end px-[8px] py-[4px] rounded-[6px] shrink-0"
+                  >
+                    <div aria-hidden="true" className="absolute border border-[#cccfd4] border-solid inset-0 pointer-events-none rounded-[6px]" />
+                    <div className="flex flex-col font-['DM_Sans'] font-semibold justify-center leading-[0] relative shrink-0 text-[#282e38] text-[16px] text-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
+                      <p className="leading-[normal] whitespace-pre">{tag}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+    </>
+  );
+}
