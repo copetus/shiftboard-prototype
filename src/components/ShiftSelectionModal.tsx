@@ -46,7 +46,7 @@ function CheckSymbol({ checked }: { checked: boolean }) {
 
 function Checkbox({ option, checked, onClick }: { option: ShiftOption; checked: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full text-left cursor-pointer">
+    <button aria-pressed={checked} onClick={onClick} className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full text-left cursor-pointer">
       <CheckSymbol checked={checked} />
       <div
         className={`flex flex-col justify-center leading-[0] relative shrink-0 text-[#282e38] text-[16px] text-nowrap ${
@@ -176,6 +176,7 @@ export function ShiftSelectionModal({
           {/* Close Button */}
           <button
             onClick={() => onOpenChange(false)}
+            aria-label="Close shift selection"
             className="absolute block cursor-pointer right-[24px] size-[32px] top-[16px] z-[4]"
           >
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">

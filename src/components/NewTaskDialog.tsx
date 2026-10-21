@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogPortal, DialogOverlay } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Checkbox } from "./ui/checkbox";
 import svgPaths from "../imports/svg-4lr7at9zxn";
 
@@ -58,9 +58,9 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogPortal>
-        <DialogOverlay />
-        <div className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] w-full max-w-[calc(100%-2rem)] sm:max-w-[788px]">
+      <DialogContent className="new-task-dialog p-0 gap-0 [&>button]:hidden">
+        <DialogTitle className="sr-only">Create New Task</DialogTitle>
+        <DialogDescription className="sr-only">Configure a task for this prototype shift.</DialogDescription>
           <div className="bg-white box-border flex flex-col isolate overflow-clip rounded-[6px] shadow-[0px_2px_12px_0px_rgba(41,46,55,0.1)] max-h-[calc(100vh-4rem)]">
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
@@ -76,6 +76,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                   </p>
                   <button
                     type="button"
+                    aria-label="Task class"
+                    aria-expanded={taskClassDropdownOpen}
                     onClick={() => setTaskClassDropdownOpen(!taskClassDropdownOpen)}
                     className="bg-white h-[44px] relative rounded-[6px] w-full border border-[#7e8b9d] hover:bg-slate-50 transition-colors"
                   >
@@ -158,6 +160,7 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                       <div className="box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
                         <input
                           type="text"
+                          aria-label="Standard duration in minutes"
                           value={duration}
                           onChange={(e) => setDuration(e.target.value)}
                           className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] bg-transparent border-none outline-none"
@@ -178,6 +181,7 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                       <div className="box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
                         <input
                           type="text"
+                          aria-label="Specific time"
                           value={time}
                           onChange={(e) => setTime(e.target.value)}
                           className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] bg-transparent border-none outline-none"
@@ -205,7 +209,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="bg-white box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] rounded-[6px] w-[85px] border border-[#7e8b9d]">
                       <input
                         type="text"
-                        value={repeatTimes}
+                        aria-label="Times per shift"
+                          value={repeatTimes}
                         onChange={(e) => setRepeatTimes(e.target.value)}
                         className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] bg-transparent border-none outline-none"
                         style={{ fontVariationSettings: "'opsz' 14" }}
@@ -243,6 +248,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="flex gap-[8px] items-center w-[128px]">
                       <button
                         type="button"
+                        aria-label="Sunday"
+                        aria-pressed={selectedDays.sunday}
                         onClick={() => toggleDay('sunday')}
                         className="size-[22px] shrink-0"
                       >
@@ -264,6 +271,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="flex gap-[8px] items-center w-[128px]">
                       <button
                         type="button"
+                        aria-label="Monday"
+                        aria-pressed={selectedDays.monday}
                         onClick={() => toggleDay('monday')}
                         className="size-[22px] shrink-0"
                       >
@@ -285,6 +294,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="flex gap-[8px] items-center w-[128px]">
                       <button
                         type="button"
+                        aria-label="Tuesday"
+                        aria-pressed={selectedDays.tuesday}
                         onClick={() => toggleDay('tuesday')}
                         className="size-[22px] shrink-0"
                       >
@@ -306,6 +317,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="flex gap-[8px] items-center w-[128px]">
                       <button
                         type="button"
+                        aria-label="Wednesday"
+                        aria-pressed={selectedDays.wednesday}
                         onClick={() => toggleDay('wednesday')}
                         className="size-[22px] shrink-0"
                       >
@@ -327,6 +340,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="flex gap-[8px] items-center w-[128px]">
                       <button
                         type="button"
+                        aria-label="Thursday"
+                        aria-pressed={selectedDays.thursday}
                         onClick={() => toggleDay('thursday')}
                         className="size-[22px] shrink-0"
                       >
@@ -348,6 +363,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="flex gap-[8px] items-center w-[128px]">
                       <button
                         type="button"
+                        aria-label="Friday"
+                        aria-pressed={selectedDays.friday}
                         onClick={() => toggleDay('friday')}
                         className="size-[22px] shrink-0"
                       >
@@ -369,6 +386,8 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="flex gap-[8px] items-center w-[128px]">
                       <button
                         type="button"
+                        aria-label="Saturday"
+                        aria-pressed={selectedDays.saturday}
                         onClick={() => toggleDay('saturday')}
                         className="size-[22px] shrink-0"
                       >
@@ -397,6 +416,7 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                     <div className="flex items-start h-full">
                       <div className="box-border flex gap-[8px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
                         <textarea
+                          aria-label="Notes"
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
                           className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] bg-transparent border-none outline-none resize-none min-h-[60px]"
@@ -446,6 +466,7 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
             <button
               type="button"
               onClick={handleCancel}
+              aria-label="Close new task"
               className="absolute right-[24px] top-[16px] size-[32px] hover:opacity-70 transition-opacity"
             >
               <svg className="block size-full" fill="none" viewBox="0 0 32 32">
@@ -453,8 +474,7 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
               </svg>
             </button>
           </div>
-        </div>
-      </DialogPortal>
+      </DialogContent>
     </Dialog>
   );
 }

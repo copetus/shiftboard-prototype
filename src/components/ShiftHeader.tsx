@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import svgPaths from "../imports/svg-rh1g3fm2ym";
+import { useState, useEffect } from "react";
 import { DateSelectionModal } from "./DateSelectionModal";
 import { ShiftSelectionModal } from "./ShiftSelectionModal";
-import { X } from "lucide-react";
+import { X, CalendarDays, Plus } from "lucide-react";
 
 interface ShiftHeaderProps {
   onNewTask: () => void;
@@ -20,11 +19,6 @@ export function ShiftHeader({ onNewTask, onDateShiftChange, onShiftRemove, curre
   const [tempDate, setTempDate] = useState(currentDate);
   const [tempShifts, setTempShifts] = useState(currentShifts);
   
-  // Overflow detection
-  const [showSimplified, setShowSimplified] = useState(false);
-  const shiftsContainerRef = useRef<HTMLDivElement>(null);
-  const shiftsContentRef = useRef<HTMLDivElement>(null);
-
   // Update temp state when current state changes externally
   useEffect(() => {
     setTempDate(currentDate);
@@ -49,27 +43,6 @@ export function ShiftHeader({ onNewTask, onDateShiftChange, onShiftRemove, curre
     };
     return shiftMap[shiftId];
   };
-
-  // Check for overflow
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (!shiftsContainerRef.current || !shiftsContentRef.current) return;
-      
-      const containerWidth = shiftsContainerRef.current.offsetWidth;
-      const contentWidth = shiftsContentRef.current.scrollWidth;
-      
-      setShowSimplified(contentWidth > containerWidth);
-    };
-
-    checkOverflow();
-    
-    const resizeObserver = new ResizeObserver(checkOverflow);
-    if (shiftsContainerRef.current) {
-      resizeObserver.observe(shiftsContainerRef.current);
-    }
-
-    return () => resizeObserver.disconnect();
-  }, [currentShifts]);
 
   const handleOpenDateModal = () => {
     setTempDate(currentDate);
@@ -132,114 +105,22 @@ export function ShiftHeader({ onNewTask, onDateShiftChange, onShiftRemove, curre
 
   return (
     <>
-      <div className="bg-white box-border flex items-start justify-between pb-[16px] pt-[24px] px-[24px] shadow-[0px_1px_3px_0px_#c0c1c3,0px_0px_1px_0px_#9a9ca0] fixed top-[76px] left-[91px] right-0 z-40">
-        {/* Left Side */}
-        <div className="flex flex-col gap-[16px] items-start justify-center min-w-0 flex-1 mr-4">
-          {/* Title */}
-          <div className="flex gap-[12px] items-center">
-            <p className="font-['DM_Sans'] font-bold text-[#282e38] text-[32px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-              Shift Board
-            </p>
-          </div>
-
-          {/* Date and Shifts */}
-          <div className="flex gap-[8px] items-center min-w-0 w-full">
-            {/* Date Picker */}
-            <button
-              onClick={handleOpenDateModal}
-              className="bg-white rounded-[6px] border border-[#7e8b9d] hover:bg-slate-50 transition-colors cursor-pointer shrink-0 h-[40px]"
-            >
-              <div className="box-border flex gap-[8px] items-center px-[12px]">
-                <div className="size-[24px]">
-                  <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-                    <path d={svgPaths.p6ea8c00} fill="black" />
-                  </svg>
-                </div>
-                <p className="font-['DM_Sans'] font-normal text-[#282e38] text-[18px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                  {getDateLabel(currentDate)}
-                </p>
-              </div>
-            </button>
-
-            {/* Shift Tabs Container */}
-            <div ref={shiftsContainerRef} className="flex gap-[8px] items-start min-w-0 flex-1 relative">
-              {/* Simplified representation when overflow */}
-              <div className={`flex gap-[8px] ${showSimplified ? '' : 'hidden'}`}>
-                <button
-                  onClick={handleOpenShiftModal}
-                  className="bg-[#f1f7ff] box-border flex gap-[8px] items-center justify-end px-[8px] rounded-[6px] border border-[#7993c6] hover:bg-[#e3efff] transition-colors cursor-pointer shrink-0 h-[40px]"
-                >
-                  <div className="bg-[#003396] box-border flex gap-[4px] items-center justify-center px-[6px] py-[4px] rounded-[4px]">
-                    <p className="font-['DM_Sans'] font-semibold text-white text-[16px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                      {currentShifts.length}
-                    </p>
-                  </div>
-                  <p className="font-['DM_Sans'] font-semibold text-[#3059a9] text-[16px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                    Shifts
-                  </p>
-                </button>
-                <button
-                  onClick={handleOpenShiftModal}
-                  className="bg-[#f1f7ff] box-border flex gap-[4px] items-center justify-end px-[12px] rounded-[6px] border border-[#7993c6] hover:bg-[#e3efff] transition-colors cursor-pointer shrink-0 h-[40px]"
-                >
-                  <div className="size-[20px]">
-                    <svg className="block size-full" fill="none" viewBox="0 0 20 20">
-                      <path d={svgPaths.p121ff280} fill="#1846A0" />
-                    </svg>
-                  </div>
-                </button>
-              </div>
-              
-              {/* Full shift tabs when no overflow - always render for measurement */}
-              <div ref={shiftsContentRef} className={`flex gap-[8px] items-start ${showSimplified ? 'invisible absolute' : ''}`}>
-                {currentShifts.map((shiftId) => (
-                  <div key={shiftId} className="bg-[#f1f7ff] box-border flex gap-[8px] items-center justify-end px-[12px] rounded-[6px] border border-[#7993c6] shrink-0 group h-[40px]">
-                    <p className="font-['DM_Sans'] font-semibold text-[#3059a9] text-[16px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                      {getShiftLabel(shiftId)}
-                    </p>
-                    {currentShifts.length > 1 && (
-                      <button
-                        onClick={(e) => handleShiftRemoveClick(e, shiftId)}
-                        className="flex items-center justify-center hover:bg-[#d0e1f9] rounded transition-colors p-0.5"
-                        aria-label={`Remove ${getShiftLabel(shiftId)}`}
-                      >
-                        <X className="w-4 h-4 text-[#3059a9]" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                <button
-                  onClick={handleOpenShiftModal}
-                  className="bg-[#f1f7ff] box-border flex gap-[4px] items-center justify-end px-[12px] rounded-[6px] border border-[#7993c6] hover:bg-[#e3efff] transition-colors cursor-pointer shrink-0 h-[40px]"
-                >
-                  <div className="size-[20px]">
-                    <svg className="block size-full" fill="none" viewBox="0 0 20 20">
-                      <path d={svgPaths.p121ff280} fill="#1846A0" />
-                    </svg>
-                  </div>
-                </button>
-              </div>
-            </div>
+      <header className="shift-header">
+        <div className="page-heading">
+          <div><span className="eyebrow">Operations / Tasks</span><h1>Shift Board</h1><p>Keep your team in view and your shift on track.</p></div>
+          <button onClick={onNewTask} className="primary-action"><Plus size={18} aria-hidden="true" />New Task</button>
+        </div>
+        <div className="shift-controls">
+          <button onClick={handleOpenDateModal} className="secondary-action"><CalendarDays size={18} aria-hidden="true" />{getDateLabel(currentDate)}</button>
+          <div className="shift-chips" aria-label="Selected shifts">
+            {currentShifts.map(shiftId => <div key={shiftId} className="shift-chip">
+              <span>{getShiftLabel(shiftId)}</span>
+              {currentShifts.length > 1 && <button onClick={e => handleShiftRemoveClick(e, shiftId)} className="icon-action" aria-label={`Remove ${getShiftLabel(shiftId)}`}><X size={16} aria-hidden="true" /></button>}
+            </div>)}
+            <button onClick={handleOpenShiftModal} className="secondary-action" aria-label="Edit selected shifts"><Plus size={18} aria-hidden="true" /><span>Shifts</span></button>
           </div>
         </div>
-
-        {/* Right Side - New Task Button (Always Visible) */}
-        <div className="flex gap-[16px] items-center shrink-0">
-          <button
-            onClick={onNewTask}
-            className="bg-[#003396] box-border flex gap-[8px] h-[44px] items-center justify-center px-[16px] py-[16px] rounded-[6px] hover:bg-[#002975] transition-colors whitespace-nowrap"
-          >
-            <div className="size-[24px]">
-              <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-                <path d={svgPaths.p21cef280} fill="white" />
-              </svg>
-            </div>
-            <p className="font-['DM_Sans'] font-bold text-white text-[18px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-              New Task
-            </p>
-          </button>
-        </div>
-      </div>
+      </header>
 
       {/* Modals */}
       <DateSelectionModal

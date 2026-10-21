@@ -2,7 +2,7 @@ import svgPaths from "../imports/svg-rh1g3fm2ym";
 
 export function TopNav() {
   return (
-    <div className="bg-white box-border flex h-[76px] items-center justify-between px-[24px] py-[16px] shadow-[0px_1px_11px_0px_#c0c1c3] sticky top-0 z-50">
+    <div className="app-topbar bg-white box-border flex h-[76px] items-center justify-between px-[24px] py-[16px] shadow-[0px_1px_11px_0px_#c0c1c3] sticky top-0 z-50">
       {/* Left Side - Logo */}
       <div className="flex gap-[10px] items-center">
         <div className="h-[26px] overflow-clip w-[95px] relative">
@@ -35,17 +35,13 @@ export function TopNav() {
       </div>
 
       {/* Right Side */}
-      <div className="flex gap-[16px] items-center justify-end">
+      <div className="facility-context flex gap-[16px] items-center justify-end">
         {/* Department Select */}
-        <div className="bg-white box-border flex gap-[8px] items-center pl-[16px] pr-[8px] py-[8px] rounded-[6px] border border-[#7e8b9d]">
+        <div className="facility-name">
           <p className="font-['DM_Sans'] font-normal text-[#282e38] text-[18px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
             EVS 12345 - St. Sebastian's Hospital
           </p>
-          <div className="size-[24px]">
-            <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-              <path d={svgPaths.p18b66300} fill="#282E38" />
-            </svg>
-          </div>
+
         </div>
 
         {/* Avatar */}

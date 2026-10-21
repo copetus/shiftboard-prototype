@@ -39,6 +39,7 @@ function RadioButton({ option, selected, onClick }: { option: DateOption; select
   return (
     <button
       onClick={onClick}
+      aria-pressed={selected}
       className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full text-left cursor-pointer"
     >
       <RadioSymbol selected={selected} />

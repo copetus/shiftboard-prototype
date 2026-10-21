@@ -113,7 +113,7 @@ export function CancelDutyListModal({ open, onOpenChange, dutyLists, operatorNam
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white box-border max-w-[788px] p-0 gap-0 [&>button]:hidden">
+      <DialogContent className="duty-dialog bg-white box-border max-w-[788px] p-0 gap-0 [&>button]:hidden">
         <DialogTitle className="sr-only">Cancel Duty List(s)</DialogTitle>
         <DialogDescription className="sr-only">
           Select duty lists to cancel for {operatorName}
@@ -122,6 +122,7 @@ export function CancelDutyListModal({ open, onOpenChange, dutyLists, operatorNam
           {/* Close Button */}
           <button
             onClick={handleCancel}
+            aria-label="Close dialog"
             className="absolute overflow-clip right-[24px] size-[32px] top-[16px] z-[4] cursor-pointer hover:opacity-80 transition-opacity"
           >
             <div className="absolute inset-[20.833%]">
@@ -148,6 +149,10 @@ export function CancelDutyListModal({ open, onOpenChange, dutyLists, operatorNam
                       return (
                         <div
                           key={dutyList}
+                          role="checkbox"
+                          tabIndex={0}
+                          aria-checked={isSelected}
+                          onKeyDown={e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); handleCheckboxChange(dutyList); } }}
                           className={`${isSelected ? 'bg-[#f1f7ff]' : 'bg-[#f7f8f9]'} relative rounded-[6px] shrink-0 w-full cursor-pointer hover:opacity-90 transition-opacity`}
                           onClick={() => handleCheckboxChange(dutyList)}
                         >
@@ -200,6 +205,8 @@ export function CancelDutyListModal({ open, onOpenChange, dutyLists, operatorNam
                   <div className="relative w-full">
                     <button
                       type="button"
+                      aria-expanded={isDropdownOpen}
+                      aria-label="Select cancellation reason"
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       className="bg-white h-[44px] relative rounded-[6px] shrink-0 w-full cursor-pointer"
                     >

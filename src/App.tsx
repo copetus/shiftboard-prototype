@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { TopNav } from "./components/TopNav";
 import { SideNavigation } from "./components/SideNavigation";
 import { ShiftHeader } from "./components/ShiftHeader";
@@ -7,7 +7,6 @@ import { FilterBar } from "./components/FilterBar";
 import { EmployeeTaskCard, EmployeeTaskData } from "./components/EmployeeTaskCard";
 import { NewTaskDialog } from "./components/NewTaskDialog";
 import { getEmployeesForDateAndShifts } from "./data/employeeData";
-import { EmployeeCardSkeleton } from "./components/EmployeeCardSkeleton";
 import { OperatorStatusValue } from "./components/OperatorStatusDropdown";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner@2.0.3";
@@ -19,20 +18,11 @@ export default function App() {
   const [employeeData, setEmployeeData] = useState(() => 
     getEmployeesForDateAndShifts("2024-10-14", ["shift1", "shift2"])
   );
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Multi-select filter state
   const allStatusValues: OperatorStatusValue[] = ["in-progress", "on-break", "meal-break", "inactive", "idle"];
   const [selectedStatuses, setSelectedStatuses] = useState<OperatorStatusValue[]>(allStatusValues);
-  const [isFilterLoading, setIsFilterLoading] = useState(false);
-  const filterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Search state
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [isSearchLoading, setIsSearchLoading] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+  const debouncedSearchQuery = searchQuery;
+
   // Check if current date is today
   const isToday = currentDate === "2024-10-14";
   const isYesterday = currentDate === "2024-10-13";
@@ -102,16 +92,9 @@ export default function App() {
   }, [isToday]);
 
   const handleDateShiftChange = (date: string, shifts: string[]) => {
-    setIsLoading(true);
     setCurrentDate(date);
     setCurrentShifts(shifts);
-    
-    // Simulate loading delay for better UX
-    setTimeout(() => {
-      const newData = getEmployeesForDateAndShifts(date, shifts);
-      setEmployeeData(newData);
-      setIsLoading(false);
-    }, 500);
+    setEmployeeData(getEmployeesForDateAndShifts(date, shifts));
   };
 
   const handleShiftRemove = (shiftId: string) => {
@@ -123,22 +106,7 @@ export default function App() {
   };
 
   const handleStatusChange = (statuses: OperatorStatusValue[]) => {
-    // Clear any existing timeout
-    if (filterTimeoutRef.current) {
-      clearTimeout(filterTimeoutRef.current);
-    }
-
-    // Immediately show loading state
-    setIsFilterLoading(true);
-    
-    // Set the new statuses immediately
     setSelectedStatuses(statuses);
-    
-    // Debounce the actual filter application by 1 second
-    filterTimeoutRef.current = setTimeout(() => {
-      setIsFilterLoading(false);
-      filterTimeoutRef.current = null;
-    }, 1000);
   };
 
   const handleCancelDutyLists = (employeeName: string, area: "main" | "northWest" | "south", tagsToRemove: string[]) => {
@@ -197,44 +165,6 @@ export default function App() {
     });
   };
 
-  // Debounce search query with 500ms delay and loading state
-  useEffect(() => {
-    // Clear previous timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    // If there's a search query, show loading
-    if (searchQuery !== debouncedSearchQuery) {
-      setIsSearchLoading(true);
-    }
-
-    // Set new timeout
-    searchTimeoutRef.current = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-      setIsSearchLoading(false);
-    }, 500);
-
-    // Cleanup
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [searchQuery]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (filterTimeoutRef.current) {
-        clearTimeout(filterTimeoutRef.current);
-      }
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, []);
-
   // Filter employees based on search query
   const filterEmployeesBySearch = (employees: EmployeeTaskData[]): EmployeeTaskData[] => {
     if (!debouncedSearchQuery.trim()) {
@@ -270,8 +200,8 @@ export default function App() {
 
   // Filter employees based on selected statuses (multi-select)
   const filterEmployeesByStatus = (employees: EmployeeTaskData[]): EmployeeTaskData[] => {
-    // If no statuses selected or all statuses selected, show all
-    if (selectedStatuses.length === 0 || selectedStatuses.length === allStatusValues.length) {
+    // Selecting every status shows all operators. An empty selection shows none.
+    if (selectedStatuses.length === allStatusValues.length) {
       return employees;
     }
 
@@ -309,7 +239,8 @@ export default function App() {
   };
 
   return (
-    <div className="bg-[#f7f8f9] min-h-screen">
+    <div className="app-shell">
+      <a className="skip-link" href="#main-content">Skip to shift board</a>
       {/* Top Navigation */}
       <TopNav />
 
@@ -318,7 +249,7 @@ export default function App() {
         <SideNavigation />
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto">
+        <main id="main-content" className="main-content" tabIndex={-1}>
           {/* Shift Header */}
           <ShiftHeader 
             onNewTask={() => setNewTaskDialogOpen(true)} 
@@ -329,7 +260,7 @@ export default function App() {
           />
 
           {/* Content - Add top padding to account for fixed header */}
-          <div className="box-border flex flex-col gap-[24px] items-start px-[24px] py-[24px] mt-[140px]">
+          <div className="board-content">
             {/* Task Summary */}
             <TaskSummary 
               employeeData={employeeData} 
@@ -348,33 +279,17 @@ export default function App() {
             />
 
             {/* Areas */}
-            <div className="flex flex-col gap-[64px] items-start w-full">
-                  {isLoading || isFilterLoading || isSearchLoading ? (
-                    <>
-                      {/* Skeleton Loading State */}
-                      {[1, 2, 3].map((areaIndex) => (
-                        <div key={`skeleton-area-${areaIndex}`} className="flex flex-col gap-[16px] items-start w-full">
-                          <div className="h-[32px] w-[120px] bg-slate-200 animate-pulse rounded" />
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] w-full">
-                            {[1, 2, 3].map((cardIndex) => (
-                              <EmployeeCardSkeleton key={`skeleton-${areaIndex}-${cardIndex}`} />
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <>
+            <div className="area-list">
+                  <>
                       {/* Main Area */}
                       {filteredEmployeeData.main.length > 0 && (
                         <div className="flex flex-col gap-[16px] items-start w-full">
-                          <p className="font-['DM_Sans'] font-normal text-[24px] text-black whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                            Main
-                          </p>
+                          <h2 className="area-title" style={{ fontVariationSettings: "'opsz' 14" }}>
+                            Main <span>{filteredEmployeeData.main.length} operators</span>
+                          </h2>
                           
                           {/* Responsive Grid: 3 on desktop, 2 on tablet, 1 on mobile */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] w-full">
+                          <div className="operator-grid">
                             {filteredEmployeeData.main.map((employee) => (
                               <EmployeeTaskCard 
                                 key={`main-${employee.name}`} 
@@ -391,11 +306,11 @@ export default function App() {
                       {/* North West Area */}
                       {filteredEmployeeData.northWest.length > 0 && (
                         <div className="flex flex-col gap-[16px] items-start w-full">
-                          <p className="font-['DM_Sans'] font-normal text-[24px] text-black whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                            North West
-                          </p>
+                          <h2 className="area-title" style={{ fontVariationSettings: "'opsz' 14" }}>
+                            North West <span>{filteredEmployeeData.northWest.length} operators</span>
+                          </h2>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] w-full">
+                          <div className="operator-grid">
                             {filteredEmployeeData.northWest.map((employee) => (
                               <EmployeeTaskCard 
                                 key={`nw-${employee.name}`} 
@@ -412,11 +327,11 @@ export default function App() {
                       {/* South Area */}
                       {filteredEmployeeData.south.length > 0 && (
                         <div className="flex flex-col gap-[16px] items-start w-full">
-                          <p className="font-['DM_Sans'] font-normal text-[24px] text-black whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                            South
-                          </p>
+                          <h2 className="area-title" style={{ fontVariationSettings: "'opsz' 14" }}>
+                            South <span>{filteredEmployeeData.south.length} operators</span>
+                          </h2>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] w-full">
+                          <div className="operator-grid">
                             {filteredEmployeeData.south.map((employee) => (
                               <EmployeeTaskCard 
                                 key={`south-${employee.name}`} 
@@ -432,20 +347,20 @@ export default function App() {
 
                       {/* No Data Message */}
                       {filteredEmployeeData.main.length === 0 && filteredEmployeeData.northWest.length === 0 && filteredEmployeeData.south.length === 0 && (
-                        <div className="flex flex-col gap-[8px] items-start w-full text-center py-12">
+                        <div className="empty-state" role="status">
                           <p className="font-['DM_Sans'] font-normal text-[24px] text-black w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
                             {debouncedSearchQuery.trim() ? 'No operators match your search' : 'There are no operators to show for your selection'}
                           </p>
                           <p className="font-['DM_Sans'] font-normal text-[16px] text-black w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                            {debouncedSearchQuery.trim() ? `Try different search terms or clear your search.` : 'Try adjusting the date or shift.'}
+                            {debouncedSearchQuery.trim() ? `Try different search terms or clear your search.` : 'Try adjusting your status filters, date or shift.'}
                           </p>
+                          <button className="secondary-action" onClick={() => { setSearchQuery(""); setSelectedStatuses(allStatusValues); }}>Clear filters</button>
                         </div>
                       )}
-                    </>
-                  )}
+                  </>
                 </div>
           </div>
-        </div>
+        </main>
       </div>
 
       {/* New Task Dialog */}
