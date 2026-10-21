@@ -2916,3 +2916,26 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   .original-chart-legend > div { animation: none; }
 }
+
+/* Match New Task to the compact modal hierarchy. */
+[data-slot="dialog-content"].new-task-dialog { width: min(600px, calc(100vw - 32px)); max-width: 600px; }
+.new-task-dialog .new-task-heading { font-size: 18px; font-weight: 600; line-height: 1.4; padding-right: 40px; }
+.new-task-dialog [class*="text-[16px]"], .new-task-dialog [class*="text-[18px]"], .new-task-dialog input, .new-task-dialog textarea { font-size: 13px; line-height: 1.5; }
+.new-task-dialog .font-bold { font-weight: 600; }
+.new-task-dialog .new-task-help { font-size: 12px; color: var(--sb-muted); }
+.new-task-dialog [class*="gap-[32px]"], .new-task-dialog [class*="gap-[24px]"] { gap: 20px; }
+.new-task-dialog [class*="px-[24px]"] { padding-left: 20px; padding-right: 20px; }
+.new-task-dialog [class*="py-[24px]"] { padding-top: 20px; padding-bottom: 20px; }
+.new-task-dialog [class*="pt-[24px]"] { padding-top: 16px; }
+.new-task-dialog [class*="pb-[24px]"] { padding-bottom: 20px; }
+.new-task-dialog [class*="gap-[20px]"] { gap: 12px; }
+.new-task-dialog [class*="min-w-[190px]"] { min-width: 0; }
+.new-task-dialog [class*="w-[231px]"] { width: min(231px, 100%); }
+.new-task-dialog [class*="size-[24px]"] { width: 16px; height: 16px; flex-shrink: 0; }
+.new-task-dialog .new-task-close { position: absolute; top: 10px; right: 12px; color: var(--sb-muted); }
+.new-task-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 4px 12px; }
+.new-task-day { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 6px; border-radius: 6px; font-size: 13px; line-height: 1.5; cursor: pointer; }
+.new-task-day:hover, .new-task-day:focus-within { background: #eef4ff; }
+.new-task-day input { width: 18px; height: 18px; flex: 0 0 18px; margin: 0; accent-color: var(--sb-blue); cursor: pointer; }
+.new-task-day input:checked + span { font-weight: 600; }
+@media (max-width: 700px), (pointer: coarse) { .new-task-day { min-height: 44px; } }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Checkbox } from "./ui/checkbox";
+import { X } from "lucide-react";
 import svgPaths from "../imports/svg-4lr7at9zxn";
 
 interface NewTaskDialogProps {
@@ -65,7 +65,7 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
               <div className="box-border flex flex-col gap-[32px] px-[24px] py-[24px]">
-                <p className="font-['DM_Sans'] font-bold text-[#282e38] text-[24px]" style={{ fontVariationSettings: "'opsz' 14" }}>
+                <p className="new-task-heading font-['DM_Sans'] font-bold text-[#282e38] text-[24px]" style={{ fontVariationSettings: "'opsz' 14" }}>
                   Create New Task
                 </p>
 
@@ -145,7 +145,7 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                       </div>
                     </div>
                   </div>
-                  <p className="font-['DM_Sans'] font-normal text-[#4e535b] text-[18px] w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
+                  <p className="new-task-help font-['DM_Sans'] font-normal text-[#4e535b] text-[18px] w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
                     Selecting multiple locations will create one task per location.
                   </p>
                 </div>
@@ -243,167 +243,13 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
                   </div>
 
                   {/* Day Checkboxes */}
-                  <div className="flex flex-wrap gap-[16px] w-full">
-                    {/* Sunday */}
-                    <div className="flex gap-[8px] items-center w-[128px]">
-                      <button
-                        type="button"
-                        aria-label="Sunday"
-                        aria-pressed={selectedDays.sunday}
-                        onClick={() => toggleDay('sunday')}
-                        className="size-[22px] shrink-0"
-                      >
-                        {selectedDays.sunday ? (
-                          <svg className="block size-full" fill="none" viewBox="0 0 22 22">
-                            <path d={svgPaths.p10e14680} fill="#003396" />
-                            <path d={svgPaths.p1ca57180} fill="white" />
-                          </svg>
-                        ) : (
-                          <div className="bg-white rounded-[4px] size-full border-2 border-[#7e8b9d]" />
-                        )}
-                      </button>
-                      <div className={`font-['DM_Sans'] ${selectedDays.sunday ? 'font-bold' : 'font-normal'} text-[#282e38] text-[16px] whitespace-nowrap`} style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Sunday
-                      </div>
-                    </div>
-
-                    {/* Monday */}
-                    <div className="flex gap-[8px] items-center w-[128px]">
-                      <button
-                        type="button"
-                        aria-label="Monday"
-                        aria-pressed={selectedDays.monday}
-                        onClick={() => toggleDay('monday')}
-                        className="size-[22px] shrink-0"
-                      >
-                        {selectedDays.monday ? (
-                          <svg className="block size-full" fill="none" viewBox="0 0 22 22">
-                            <path d={svgPaths.p10e14680} fill="#003396" />
-                            <path d={svgPaths.p1ca57180} fill="white" />
-                          </svg>
-                        ) : (
-                          <div className="bg-white rounded-[4px] size-full border-2 border-[#7e8b9d]" />
-                        )}
-                      </button>
-                      <div className={`font-['DM_Sans'] ${selectedDays.monday ? 'font-bold' : 'font-normal'} text-[#282e38] text-[16px] whitespace-nowrap`} style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Monday
-                      </div>
-                    </div>
-
-                    {/* Tuesday */}
-                    <div className="flex gap-[8px] items-center w-[128px]">
-                      <button
-                        type="button"
-                        aria-label="Tuesday"
-                        aria-pressed={selectedDays.tuesday}
-                        onClick={() => toggleDay('tuesday')}
-                        className="size-[22px] shrink-0"
-                      >
-                        {selectedDays.tuesday ? (
-                          <svg className="block size-full" fill="none" viewBox="0 0 22 22">
-                            <path d={svgPaths.p10e14680} fill="#003396" />
-                            <path d={svgPaths.p1ca57180} fill="white" />
-                          </svg>
-                        ) : (
-                          <div className="bg-white rounded-[4px] size-full border-2 border-[#7e8b9d]" />
-                        )}
-                      </button>
-                      <div className={`font-['DM_Sans'] ${selectedDays.tuesday ? 'font-bold' : 'font-normal'} text-[#282e38] text-[16px] whitespace-nowrap`} style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Tuesday
-                      </div>
-                    </div>
-
-                    {/* Wednesday */}
-                    <div className="flex gap-[8px] items-center w-[128px]">
-                      <button
-                        type="button"
-                        aria-label="Wednesday"
-                        aria-pressed={selectedDays.wednesday}
-                        onClick={() => toggleDay('wednesday')}
-                        className="size-[22px] shrink-0"
-                      >
-                        {selectedDays.wednesday ? (
-                          <svg className="block size-full" fill="none" viewBox="0 0 22 22">
-                            <path d={svgPaths.p10e14680} fill="#003396" />
-                            <path d={svgPaths.p1ca57180} fill="white" />
-                          </svg>
-                        ) : (
-                          <div className="bg-white rounded-[4px] size-full border-2 border-[#7e8b9d]" />
-                        )}
-                      </button>
-                      <div className={`font-['DM_Sans'] ${selectedDays.wednesday ? 'font-bold' : 'font-normal'} text-[#282e38] text-[16px] whitespace-nowrap`} style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Wednesday
-                      </div>
-                    </div>
-
-                    {/* Thursday */}
-                    <div className="flex gap-[8px] items-center w-[128px]">
-                      <button
-                        type="button"
-                        aria-label="Thursday"
-                        aria-pressed={selectedDays.thursday}
-                        onClick={() => toggleDay('thursday')}
-                        className="size-[22px] shrink-0"
-                      >
-                        {selectedDays.thursday ? (
-                          <svg className="block size-full" fill="none" viewBox="0 0 22 22">
-                            <path d={svgPaths.p10e14680} fill="#003396" />
-                            <path d={svgPaths.p1ca57180} fill="white" />
-                          </svg>
-                        ) : (
-                          <div className="bg-white rounded-[4px] size-full border-2 border-[#7e8b9d]" />
-                        )}
-                      </button>
-                      <div className={`font-['DM_Sans'] ${selectedDays.thursday ? 'font-bold' : 'font-normal'} text-[#282e38] text-[16px] whitespace-nowrap`} style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Thursday
-                      </div>
-                    </div>
-
-                    {/* Friday */}
-                    <div className="flex gap-[8px] items-center w-[128px]">
-                      <button
-                        type="button"
-                        aria-label="Friday"
-                        aria-pressed={selectedDays.friday}
-                        onClick={() => toggleDay('friday')}
-                        className="size-[22px] shrink-0"
-                      >
-                        {selectedDays.friday ? (
-                          <svg className="block size-full" fill="none" viewBox="0 0 22 22">
-                            <path d={svgPaths.p10e14680} fill="#003396" />
-                            <path d={svgPaths.p1ca57180} fill="white" />
-                          </svg>
-                        ) : (
-                          <div className="bg-white rounded-[4px] size-full border-2 border-[#7e8b9d]" />
-                        )}
-                      </button>
-                      <div className={`font-['DM_Sans'] ${selectedDays.friday ? 'font-bold' : 'font-normal'} text-[#282e38] text-[16px] whitespace-nowrap`} style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Friday
-                      </div>
-                    </div>
-
-                    {/* Saturday */}
-                    <div className="flex gap-[8px] items-center w-[128px]">
-                      <button
-                        type="button"
-                        aria-label="Saturday"
-                        aria-pressed={selectedDays.saturday}
-                        onClick={() => toggleDay('saturday')}
-                        className="size-[22px] shrink-0"
-                      >
-                        {selectedDays.saturday ? (
-                          <svg className="block size-full" fill="none" viewBox="0 0 22 22">
-                            <path d={svgPaths.p10e14680} fill="#003396" />
-                            <path d={svgPaths.p1ca57180} fill="white" />
-                          </svg>
-                        ) : (
-                          <div className="bg-white rounded-[4px] size-full border-2 border-[#7e8b9d]" />
-                        )}
-                      </button>
-                      <div className={`font-['DM_Sans'] ${selectedDays.saturday ? 'font-bold' : 'font-normal'} text-[#282e38] text-[16px] whitespace-nowrap`} style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Saturday
-                      </div>
-                    </div>
+                  <div className="new-task-days" role="group" aria-label="Repeat on days">
+                    {(Object.keys(selectedDays) as (keyof typeof selectedDays)[]).map(day => (
+                      <label className="new-task-day" key={day}>
+                        <input type="checkbox" checked={selectedDays[day]} onChange={() => toggleDay(day)} />
+                        <span>{day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
 
@@ -467,11 +313,9 @@ export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
               type="button"
               onClick={handleCancel}
               aria-label="Close new task"
-              className="absolute right-[24px] top-[16px] size-[32px] hover:opacity-70 transition-opacity"
+              className="new-task-close icon-action"
             >
-              <svg className="block size-full" fill="none" viewBox="0 0 32 32">
-                <path d={svgPaths.p2c7ebf00} fill="#282E38" />
-              </svg>
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
       </DialogContent>
