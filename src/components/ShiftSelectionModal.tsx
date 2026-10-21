@@ -31,7 +31,7 @@ export function ShiftSelectionModal({ open, onOpenChange, selectedShifts, onShif
         <DialogDescription className="sr-only">Choose one or more shifts to display on the shift board for {selectedDateLabel}</DialogDescription>
         <button type="button" className="icon-action selection-dialog-close" aria-label="Close shift selection" onClick={() => onOpenChange(false)}><X size={16} aria-hidden="true" /></button>
         <button type="button" className="selection-date-back" onClick={onBack}><ArrowLeft size={16} aria-hidden="true" /><span>{selectedDateLabel}</span></button>
-        <div className="selection-options" role="group" aria-label="Shifts">
+        <div className="selection-options shift-selection-options" role="group" aria-label="Shifts">
           {shiftOptions.map(option => <label className="selection-option" key={option.id}>
             <input type="checkbox" checked={selectedShifts.includes(option.id)} onChange={() => onShiftToggle(option.id)} />
             <span>{option.label} <span className="selection-option-detail">({option.time})</span></span>

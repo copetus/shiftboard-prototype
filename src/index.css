@@ -2768,11 +2768,10 @@ button:disabled { cursor: not-allowed; }
 .duty-tag-row, .duty-tag-measure { gap: 6px; }
 .duty-tag { border-radius: 4px; padding: 3px 6px; background: #f7f8f9; border: 1px solid #d3d9e2; }
 .duty-tag p, .duty-tag > div { font-size: 12px; line-height: 1.3; font-weight: 600; color: #455061; }
-.duty-tag-row button { min-width: 40px; min-height: 30px; }
+.duty-tag-row button { min-width: 0; min-height: 0; width: auto; height: auto; justify-content: center; }
 .no-assignments { color: #728198; font-size: 12px; }
 @media (max-width: 700px) {
   .operator-shift-strip .icon-action { width: 44px; height: 44px; }
-  .duty-tag-row button { min-width: 44px; min-height: 44px; }
 }
 
 /* Preserve the original progress + donut/legend + category matrix composition. */
@@ -2887,3 +2886,33 @@ button:disabled { cursor: not-allowed; }
 .operator-work-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; min-width: 0; }
 .operator-bottom-panel .employee-location { margin: 0; align-items: center; justify-content: flex-end; text-align: right; max-width: 55%; line-height: 1.5; }
 .operator-bottom-panel .employee-location span { min-width: 0; overflow-wrap: anywhere; }
+
+.shift-selection-options .selection-option { padding: 8px 10px; border-radius: 6px; }
+.shift-selection-options .selection-option:hover,
+.shift-selection-options .selection-option:focus-within { background: #eef4ff; }
+
+.original-donut-segments { position: absolute; inset: -5px; }
+
+/* Corresponding labels and cells enter together, one matrix row at a time. */
+.matrix-reveal-row { animation: matrix-row-enter 280ms ease-out both; }
+.matrix-reveal-row:nth-child(1) { animation-delay: 150ms; }
+.matrix-reveal-row:nth-child(2) { animation-delay: 250ms; }
+.matrix-reveal-row:nth-child(3) { animation-delay: 350ms; }
+.matrix-reveal-row:nth-child(4) { animation-delay: 450ms; }
+.matrix-reveal-row:nth-child(5) { animation-delay: 550ms; }
+@keyframes matrix-row-enter {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .matrix-reveal-row { animation: none; }
+}
+
+.original-chart-legend > div { animation: matrix-row-enter 280ms ease-out both; }
+.original-chart-legend > div:nth-child(1) { animation-delay: 150ms; }
+.original-chart-legend > div:nth-child(2) { animation-delay: 250ms; }
+.original-chart-legend > div:nth-child(3) { animation-delay: 350ms; }
+.original-chart-legend > div:nth-child(4) { animation-delay: 450ms; }
+@media (prefers-reduced-motion: reduce) {
+  .original-chart-legend > div { animation: none; }
+}

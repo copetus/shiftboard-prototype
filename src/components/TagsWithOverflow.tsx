@@ -12,18 +12,18 @@ interface TagsWithOverflowProps {
 export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
+  const overflowMeasureRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(tags.length);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const calculateVisibleTags = () => {
-      if (!containerRef.current || !measureRef.current || tags.length === 0) {
+      if (!containerRef.current || !measureRef.current || !overflowMeasureRef.current || tags.length === 0) {
         return;
       }
 
       const containerWidth = containerRef.current.offsetWidth;
       const gap = 6; // Gap between tags
-      const overflowBadgeWidth = 60; // Approximate width of +N badge
 
       // Get all tag elements from the hidden measurement container
       const tagElements = Array.from(measureRef.current.children) as HTMLElement[];
@@ -53,6 +53,8 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
           const tagWidth = tagElements[i].offsetWidth;
           const widthWithGap = totalWidth + tagWidth + (i > 0 ? gap : 0);
           const needsOverflowBadge = i < tagElements.length - 1;
+          overflowMeasureRef.current.firstElementChild!.textContent = `+${tags.length - i - 1}`;
+          const overflowBadgeWidth = overflowMeasureRef.current.offsetWidth;
           const totalNeeded = widthWithGap + (needsOverflowBadge ? gap + overflowBadgeWidth : 0);
           
           if (totalNeeded <= containerWidth) {
@@ -79,6 +81,7 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
 
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
+      if (measureRef.current) resizeObserver.observe(measureRef.current);
     }
 
     return () => {
@@ -92,6 +95,7 @@ export function TagsWithOverflow({ tags }: TagsWithOverflowProps) {
 
   return (
     <>
+      <div ref={overflowMeasureRef} className="duty-tag" aria-hidden="true" style={{ position: "fixed", top: -9999, left: -9999, width: "max-content", visibility: "hidden", pointerEvents: "none" }}><p>+{tags.length}</p></div>
       {/* Hidden measurement container - rendered off-screen to measure tag widths */}
       <div
         ref={measureRef}

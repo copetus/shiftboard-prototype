@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import svgPaths from "../imports/svg-rh1g3fm2ym";
 import donutSvgPaths from "../imports/svg-rs9eifyou2";
 import { EmployeeTaskData } from "./EmployeeTaskCard";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { animate, motion, AnimatePresence, useReducedMotion } from "motion/react";
 
 interface TaskSummaryProps {
   employeeData: {
@@ -43,6 +43,25 @@ interface TaskCategoryData {
 interface TooltipData {
   category: string;
   status: string;
+}
+
+function AnimatedOperatorCount({ total }: { total: number }) {
+  const reduceMotion = useReducedMotion();
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    setCount(0);
+    const animation = animate(0, total, {
+      duration: 0.65,
+      delay: 0.15,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      onUpdate: value => setCount(Math.round(value)),
+    });
+    return () => animation.stop();
+  }, [total, reduceMotion]);
+
+  return <span aria-label={`${total}`}><span aria-hidden="true">{reduceMotion ? total : count}</span></span>;
 }
 
 export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, isDayAfterTomorrow }: TaskSummaryProps) {
@@ -399,6 +418,12 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                     <div className="original-chart-and-legend flex gap-[24px] items-center w-full">
                       {/* Donut Chart */}
                       <div className="original-donut relative shrink-0 size-[207px]">
+                        <motion.div
+                          className="original-donut-segments"
+                          initial={reduceMotion ? false : { maskImage: "conic-gradient(from 0deg, #000 0deg, transparent 0deg)" }}
+                          animate={{ maskImage: "conic-gradient(from 0deg, #000 360deg, transparent 360deg)" }}
+                          transition={{ duration: reduceMotion ? 0 : 0.65, delay: reduceMotion ? 0 : 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
+                        >
                         <div className="absolute flex inset-0 items-center justify-center">
                           <div className="flex-none rotate-[270deg] size-[216px]">
                             <div className="relative size-full">
@@ -448,9 +473,10 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                             </div>
                           </div>
                         </div>
+                        </motion.div>
                         <div className="absolute flex flex-col font-['DM_Sans'] font-normal h-[100px] items-start justify-between text-[#282e38] text-center left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%] w-[188px]">
                           <p className="relative shrink-0 text-[70px] w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                            {operatorBreakdown.total}
+                            <AnimatedOperatorCount total={operatorBreakdown.total} />
                           </p>
                           <p className="relative shrink-0 text-[16px] w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
                             Operators
@@ -522,11 +548,11 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                     <div className="original-category-matrix box-border flex items-start pl-0 pr-px py-0 relative w-full">
                           <div className="flex flex-col items-end pr-[16px] pt-[34px] shrink-0">
                             <div className="box-border flex flex-col font-['DM_Sans'] font-normal text-black text-right pb-px text-[14px]" style={{ fontVariationSettings: "'opsz' 14" }}>
-                              <div className="flex items-center justify-end min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Unassigned</p></div>
-                              <div className="flex items-center justify-end min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Assigned & Open</p></div>
-                              <div className="flex items-center justify-end min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Cancelled</p></div>
-                              <div className="flex items-center justify-end min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Cannot Complete</p></div>
-                              <div className="flex items-center justify-end min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Completed</p></div>
+                              <div className="flex items-center justify-end matrix-reveal-row min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Unassigned</p></div>
+                              <div className="flex items-center justify-end matrix-reveal-row min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Assigned & Open</p></div>
+                              <div className="flex items-center justify-end matrix-reveal-row min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Cancelled</p></div>
+                              <div className="flex items-center justify-end matrix-reveal-row min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Cannot Complete</p></div>
+                              <div className="flex items-center justify-end matrix-reveal-row min-h-[64px] mb-[-1px]"><p className="relative shrink-0">Completed</p></div>
                             </div>
                           </div>
 
@@ -536,7 +562,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                               Discharge
                             </p>
                             <div className="box-border flex flex-col items-start min-w-px pb-px pt-0 px-0 relative shrink-0 w-full">
-                              <div className={`${getCellBackground("unassigned")} mb-[-1px] min-h-[64px] min-w-px relative rounded-br-[2px] rounded-tl-[8px] shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "unassigned")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("unassigned")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative rounded-br-[2px] rounded-tl-[8px] shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "unassigned")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none rounded-br-[2px] rounded-tl-[8px]" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -548,7 +574,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("assignedOpen")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "assignedOpen")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("assignedOpen")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "assignedOpen")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -560,7 +586,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("cancelled")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "cancelled")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("cancelled")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "cancelled")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -572,7 +598,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("cannotComplete")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "cannotComplete")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("cannotComplete")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "cannotComplete")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -584,7 +610,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("completed")} mb-[-1px] min-h-[64px] min-w-px relative rounded-bl-[8px] shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "completed")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("completed")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative rounded-bl-[8px] shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "discharges", "completed")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none rounded-bl-[8px]" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -605,7 +631,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                               Ad Hoc
                             </p>
                             <div className="box-border flex flex-col items-start min-w-px pb-px pt-0 px-0 relative shrink-0 w-full">
-                              <div className={`${getCellBackground("unassigned")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "unassigned")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("unassigned")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "unassigned")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -617,7 +643,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("assignedOpen")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "assignedOpen")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("assignedOpen")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "assignedOpen")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -629,7 +655,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("cancelled")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "cancelled")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("cancelled")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "cancelled")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -641,7 +667,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("cannotComplete")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "cannotComplete")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("cannotComplete")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "cannotComplete")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -653,7 +679,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("completed")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "completed")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("completed")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "adHoc", "completed")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -674,7 +700,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                               Duty List
                             </p>
                             <div className="box-border flex flex-col items-start min-w-px pb-px pt-0 px-0 relative shrink-0 w-full">
-                              <div className={`${getCellBackground("unassigned")} mb-[-1px] min-h-[64px] min-w-px relative rounded-tr-[8px] shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "unassigned")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("unassigned")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative rounded-tr-[8px] shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "unassigned")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none rounded-tr-[8px]" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -686,7 +712,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("assignedOpen")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "assignedOpen")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("assignedOpen")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "assignedOpen")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -698,7 +724,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("cancelled")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "cancelled")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("cancelled")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "cancelled")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -717,7 +743,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("cannotComplete")} mb-[-1px] min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "cannotComplete")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("cannotComplete")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "cannotComplete")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
@@ -729,7 +755,7 @@ export function TaskSummary({ employeeData, isToday, isYesterday, isTomorrow, is
                                   </div>
                                 </div>
                               </div>
-                              <div className={`${getCellBackground("completed")} mb-[-1px] min-h-[64px] min-w-px relative rounded-br-[8px] shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "completed")} onMouseLeave={handleMouseLeave}>
+                              <div className={`${getCellBackground("completed")} mb-[-1px] matrix-reveal-row min-h-[64px] min-w-px relative rounded-br-[8px] shrink-0 w-full cursor-pointer transition-colors group`} onMouseMove={(e) => handleMouseMove(e, "dutyLists", "completed")} onMouseLeave={handleMouseLeave}>
                                 <div aria-hidden="true" className="absolute border border-[#d9dbde] border-solid inset-0 pointer-events-none rounded-br-[8px]" />
                                 <div className="flex flex-row items-center justify-center size-full">
                                   <div className="box-border flex gap-[7px] items-center justify-center p-[16px] relative size-full">
