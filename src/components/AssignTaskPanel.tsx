@@ -1,19 +1,10 @@
+import type { TaskRequest } from "../data/taskRequests";
 import type { TaskAssignment } from "../lib/assignOperatorTasks";
 import { useEffect, useId, useState } from "react";
 import { AssignmentSheetContent } from "./AssignmentSheetContent";
 import { ArrowDownWideNarrow, Search } from "lucide-react";
 import { Sheet, SheetTitle, SheetDescription } from "./ui/sheet";
 
-// Sample assignment inventory for the prototype.
-const tasks = [
-  { id: "task-101", estimatedMinutes: 35, name: "Lab cleaning", location: "Main Building · Lab 104", requestedTime: "8:10 AM", requestedAt: "08:10", shift: "shift1" },
-  { id: "task-102", estimatedMinutes: 25, name: "Pharmacy cleaning", location: "Main Building · Pharmacy 112", requestedTime: "8:25 AM", requestedAt: "08:25", shift: "shift1" },
-  { id: "task-103", estimatedMinutes: 30, name: "Cardiology exam room cleaning", location: "Heart Center · Room 208", requestedTime: "8:40 AM", requestedAt: "08:40", shift: "shift1" },
-  { id: "task-104", estimatedMinutes: 45, name: "Patient room discharge cleaning", location: "North Wing · Room 315", requestedTime: "3:35 PM", requestedAt: "15:35", shift: "shift2" },
-  { id: "task-105", estimatedMinutes: 30, name: "Pulmonary clinic cleaning", location: "Outpatient Center · Room 126", requestedTime: "9:05 AM", requestedAt: "09:05", shift: "shift1" },
-  { id: "task-106", estimatedMinutes: 20, name: "Clinical office cleaning", location: "South Wing · Office 204", requestedTime: "4:15 PM", requestedAt: "16:15", shift: "shift2" },
-  { id: "task-107", estimatedMinutes: 40, name: "Waiting area floor cleaning", location: "Emergency Department · Main lobby", requestedTime: "10:30 PM", requestedAt: "22:30", shift: "shift3" },
-];
 
 interface AssignTaskPanelProps {
   open: boolean;
@@ -23,11 +14,13 @@ interface AssignTaskPanelProps {
   location: string;
   shiftId?: string;
   assignedTasks: string[];
+  assignedTaskIds: string[];
+  tasks: TaskRequest[];
   onAssign: (tasks: TaskAssignment[]) => void;
   onCloseFocus: () => void;
 }
 
-export function AssignTaskPanel({ open, onOpenChange, operatorName, role, location, assignedTasks, onAssign, onCloseFocus }: AssignTaskPanelProps) {
+export function AssignTaskPanel({ open, onOpenChange, operatorName, role, location, assignedTasks, assignedTaskIds, tasks, onAssign, onCloseFocus }: AssignTaskPanelProps) {
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState("requests");
   const tabId = useId();
@@ -36,18 +29,19 @@ export function AssignTaskPanel({ open, onOpenChange, operatorName, role, locati
   useEffect(() => {
     if (open) { setQuery(""); setScope("requests"); setSelected([]); setNewestFirst(false); }
   }, [open, operatorName]);
-  const available = tasks.filter(task => !assignedTasks.includes(task.name));
+  const available = tasks.filter(task => !task.assigned && !assignedTaskIds.includes(task.id));
   const visible = available.filter(task => `${task.name} ${task.location}`.toLowerCase().includes(query.trim().toLowerCase()));
   visible.sort((a, b) => newestFirst ? b.requestedAt.localeCompare(a.requestedAt) : a.requestedAt.localeCompare(b.requestedAt));
-  const assigned = [...new Set(assignedTasks)].filter(name => !/^\+\d+$/.test(name)).map(name => {
-    const task = tasks.find(task => task.name === name);
-    return { name, location: task?.location, requestedTime: task?.requestedTime };
-  }).filter(task => `${task.name} ${task.location || ""}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const assignedRequests = tasks.filter(task => assignedTaskIds.includes(task.id));
+  const assigned = [
+    ...assignedRequests,
+    ...[...new Set(assignedTasks)].filter(name => !/^\+\d+$/.test(name) && !assignedRequests.some(task => name === `${task.name} · ${task.location}`)).map(name => ({ id: name, name, location: undefined, requestedTime: undefined })),
+  ].filter(task => `${task.name} ${task.location || ""}`.toLowerCase().includes(query.trim().toLowerCase()));
   const chosen = available.filter(task => selected.includes(task.id));
   const toggle = (id: string) => setSelected(previous => previous.includes(id) ? previous.filter(value => value !== id) : [...previous, id]);
   const assign = () => {
     if (!chosen.length) return;
-    onAssign(chosen.map(({ name, estimatedMinutes }) => ({ name, estimatedMinutes })));
+    onAssign(chosen);
     onOpenChange(false);
   };
 
@@ -84,7 +78,7 @@ export function AssignTaskPanel({ open, onOpenChange, operatorName, role, locati
         </label>)}
         {visible.length === 0 && <p className="assign-task-empty">{query ? "No tasks match your search." : "No available tasks in this view."}</p>}
         </> : <>
-          {assigned.map(task => <div key={task.name} className="assign-task-option assigned-task-option">
+          {assigned.map(task => <div key={task.id} className="assign-task-option assigned-task-option">
             <span className="assign-task-name"><strong>{task.name}</strong>{task.location && <span>{task.location}</span>}</span>
             {task.requestedTime && <span className="assign-task-requested"><span>Requested</span><strong>{task.requestedTime}</strong></span>}
           </div>)}

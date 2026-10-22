@@ -1,3 +1,4 @@
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import modalSvgPaths from "../imports/svg-q8w1b094n6";
@@ -71,17 +72,14 @@ function UncheckedCheckbox() {
 export function CancelDutyListModal({ open, onOpenChange, dutyLists, operatorName, onConfirm }: CancelDutyListModalProps) {
   const [selectedDutyLists, setSelectedDutyLists] = useState<string[]>([]);
   const [selectedReason, setSelectedReason] = useState<string>("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Reset selections when modal opens
   useEffect(() => {
-    console.log("CancelDutyListModal open state changed:", open, "dutyLists:", dutyLists);
     if (open) {
       setSelectedDutyLists([]);
       setSelectedReason("");
-      setIsDropdownOpen(false);
     }
-  }, [open, dutyLists]);
+  }, [open, operatorName]);
 
   const handleCheckboxChange = (dutyList: string) => {
     if (selectedDutyLists.includes(dutyList)) {
@@ -129,7 +127,7 @@ export function CancelDutyListModal({ open, onOpenChange, dutyLists, operatorNam
           </button>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-[24px]">
+          <div className="duty-dialog-scroll flex-1 overflow-y-auto px-[24px]">
             <div className="flex flex-col gap-[32px]">
                 <p className="duty-dialog-heading font-['DM_Sans'] font-bold leading-[normal] min-w-full relative shrink-0 text-[#282e38] text-[24px] w-[min-content]" style={{ fontVariationSettings: "'opsz' 14" }}>
                   Cancel Duty List(s)
@@ -198,56 +196,14 @@ export function CancelDutyListModal({ open, onOpenChange, dutyLists, operatorNam
                     <span style={{ fontVariationSettings: "'opsz' 14" }}>Select Reason</span>
                     <span className="text-[#d6302d]" style={{ fontVariationSettings: "'opsz' 14" }}>*</span>
                   </p>
-                  <div className="relative w-full">
-                    <button
-                      type="button"
-                      aria-expanded={isDropdownOpen}
-                      aria-label="Select cancellation reason"
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="bg-white h-[44px] relative rounded-[6px] shrink-0 w-full cursor-pointer"
-                    >
-                      <div aria-hidden="true" className={`absolute ${isDropdownOpen ? 'border-[#003396]' : 'border-[#7e8b9d]'} border border-solid inset-0 pointer-events-none rounded-[6px]`} />
-                      {isDropdownOpen && (
-                        <div className="absolute bottom-px left-[2px] right-px rounded-[6px] top-px z-10">
-                          <div aria-hidden="true" className="absolute border-[#a9bada] border-[3px] border-solid inset-[-3px] pointer-events-none rounded-[9px]" />
-                        </div>
-                      )}
-                      <div className="flex flex-row items-center size-full">
-                        <div className="box-border content-stretch flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] relative w-full">
-                          <p className={`basis-0 font-['DM_Sans'] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[18px] text-left ${selectedReason ? 'text-[#282e38]' : 'text-[#878a8f]'}`} style={{ fontVariationSettings: "'opsz' 14" }}>
-                            {selectedReason || "Select"}
-                          </p>
-                          <div className="overflow-clip relative shrink-0 size-[24px]">
-                            <div className={`absolute bottom-[34.56%] left-1/4 right-1/4 top-[34.56%] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}>
-                              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 12 8">
-                                <path d={modalSvgPaths.p180a8a80} fill="#64748B" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                    
-                    {/* Dropdown Menu */}
-                    {isDropdownOpen && (
-                      <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white rounded-[6px] border border-[#d9dbde] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.1)] z-20 overflow-hidden">
-                        {reasons.map((reason) => (
-                          <button
-                            key={reason}
-                            type="button"
-                            onClick={() => {
-                              setSelectedReason(reason);
-                              setIsDropdownOpen(false);
-                            }}
-                            className="w-full text-left px-[16px] py-[12px] font-['DM_Sans'] font-normal text-[16px] text-[#282e38] hover:bg-[#f7f8f9] transition-colors cursor-pointer"
-                            style={{ fontVariationSettings: "'opsz' 14" }}
-                          >
-                            {reason}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <Select value={selectedReason} onValueChange={setSelectedReason}>
+                    <SelectTrigger className="duty-dialog-select" aria-label="Select cancellation reason">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent className="duty-dialog-select-menu" position="popper" sideOffset={4}>
+                      {reasons.map(option => <SelectItem key={option} value={option}>{option}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

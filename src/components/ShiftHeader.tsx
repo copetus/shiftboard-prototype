@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
 import { DateSelectionModal } from "./DateSelectionModal";
 import { ShiftSelectionModal } from "./ShiftSelectionModal";
-import { X, CalendarDays, Plus } from "lucide-react";
+import { CalendarDays, Plus } from "lucide-react";
 
 interface ShiftHeaderProps {
   onNewTask: () => void;
   onDateShiftChange?: (date: string, shifts: string[]) => void;
-  onShiftRemove?: (shiftId: string) => void;
   currentDate: string;
   currentShifts: string[];
 }
 
-export function ShiftHeader({ onNewTask, onDateShiftChange, onShiftRemove, currentDate, currentShifts }: ShiftHeaderProps) {
+export function ShiftHeader({ onNewTask, onDateShiftChange, currentDate, currentShifts }: ShiftHeaderProps) {
   const [dateModalOpen, setDateModalOpen] = useState(false);
   const [shiftModalOpen, setShiftModalOpen] = useState(false);
   
@@ -52,13 +51,6 @@ export function ShiftHeader({ onNewTask, onDateShiftChange, onShiftRemove, curre
   const handleOpenShiftModal = () => {
     setTempShifts([...currentShifts]);
     setShiftModalOpen(true);
-  };
-
-  const handleShiftRemoveClick = (e: React.MouseEvent, shiftId: string) => {
-    e.stopPropagation();
-    if (onShiftRemove) {
-      onShiftRemove(shiftId);
-    }
   };
 
   const handleContinueToShift = () => {
@@ -115,7 +107,6 @@ export function ShiftHeader({ onNewTask, onDateShiftChange, onShiftRemove, curre
           <div className="shift-chips" aria-label="Selected shifts">
             {currentShifts.map(shiftId => <div key={shiftId} className="shift-chip">
               <span>{getShiftLabel(shiftId)}</span>
-              {currentShifts.length > 1 && <button onClick={e => handleShiftRemoveClick(e, shiftId)} className="icon-action" aria-label={`Remove ${getShiftLabel(shiftId)}`}><X size={16} aria-hidden="true" /></button>}
             </div>)}
             <button onClick={handleOpenShiftModal} className="shift-chip add-shift-button" aria-label="Add shift" title="Add shift"><Plus size={18} aria-hidden="true" /></button>
           </div>

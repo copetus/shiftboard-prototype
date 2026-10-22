@@ -1,324 +1,91 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
-import { X } from "lucide-react";
-import svgPaths from "../imports/svg-4lr7at9zxn";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
+import { X, ChevronDown } from "lucide-react";
+import type { NewTaskDraft } from "../data/taskRequests";
 
+const locations = ["Pavilion\\2\\P2-202-A", "Pavilion\\5\\P5-502-B", "Pavilion\\1\\P1-104-Lab", "Pavilion\\1\\P1-112-Pharmacy", "Pavilion\\2\\P2-208-Cardiology", "Pavilion\\3\\P3-126-Pulmonary"];
+const timeOptions = Array.from({ length: 96 }, (_, index) => {
+  const hour = Math.floor(index / 4);
+  const minute = String((index % 4) * 15).padStart(2, "0");
+  return { value: `${String(hour).padStart(2, "0")}:${minute}`, label: `${hour % 12 || 12}:${minute} ${hour < 12 ? "AM" : "PM"}` };
+});
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const taskClasses = ["Area Clean", "Clean-patient rooms", "Clean-staff areas", "Deliver Food", "Discharge Clean", "Discharge Clean patient"];
 interface NewTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreate: (draft: NewTaskDraft) => void;
 }
 
-export function NewTaskDialog({ open, onOpenChange }: NewTaskDialogProps) {
+export function NewTaskDialog({ open, onOpenChange, onCreate }: NewTaskDialogProps) {
   const [taskClass, setTaskClass] = useState("Clean-patient rooms");
-  const [taskClassDropdownOpen, setTaskClassDropdownOpen] = useState(false);
-  const [location, setLocation] = useState("Pavilion\\2\\P2-202-A, Pavilion\\5\\P5-502-B");
+  const [selectedLocations, setLocations] = useState(locations.slice(0, 2));
+  const [locationOpen, setLocationOpen] = useState(false);
   const [duration, setDuration] = useState("10");
-  const [time, setTime] = useState("10:45 AM");
-  const [repeatEnabled, setRepeatEnabled] = useState(false);
+  const [time, setTime] = useState("10:45");
   const [repeatTimes, setRepeatTimes] = useState("1");
-  const [frequency, setFrequency] = useState("Specific Days");
-  const [notes, setNotes] = useState("This is a note the user wrote.");
-  
-  const [selectedDays, setSelectedDays] = useState({
-    sunday: true,
-    monday: false,
-    tuesday: false,
-    wednesday: false,
-    thursday: false,
-    friday: false,
-    saturday: true,
-  });
-
-  const taskClassOptions = [
-    "Area Clean",
-    "Clean-patient rooms",
-    "Clean-staff areas",
-    "Deliver Food",
-    "Discharge Clean",
-    "Discharge Clean patient",
-  ];
-
-  const handleSubmit = () => {
-    // Handle task creation
+  const [frequency, setFrequency] = useState<"specific" | "all">("specific");
+  const [selectedDays, setSelectedDays] = useState(["Sunday", "Saturday"]);
+  const [notes, setNotes] = useState("");
+  const [error, setError] = useState("");
+  const toggleLocation = (location: string) => setLocations(previous => previous.includes(location) ? previous.filter(value => value !== location) : [...previous, location]);
+  const toggleDay = (day: string) => setSelectedDays(previous => previous.includes(day) ? previous.filter(value => value !== day) : [...previous, day]);
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!selectedLocations.length) { setError("Select at least one location."); return; }
+    if (!Number.isInteger(Number(duration)) || Number(duration) < 1 || !Number.isInteger(Number(repeatTimes)) || Number(repeatTimes) < 1) { setError("Duration and repeat count must be positive whole numbers."); return; }
+    if (frequency === "specific" && !selectedDays.length) { setError("Select at least one day."); return; }
+    onCreate({taskClass, locations: selectedLocations, durationMinutes: Number(duration), specificTime: time, repeatTimes: Number(repeatTimes), frequency, days: frequency === "all" ? days : selectedDays, notes: notes.trim()});
+    setError("");
     onOpenChange(false);
   };
-
-  const handleCancel = () => {
-    onOpenChange(false);
-  };
-
-  const toggleDay = (day: keyof typeof selectedDays) => {
-    setSelectedDays(prev => ({ ...prev, [day]: !prev[day] }));
-  };
-
-  const handleTaskClassSelect = (option: string) => {
-    setTaskClass(option);
-    setTaskClassDropdownOpen(false);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="new-task-dialog p-0 gap-0 [&>button]:hidden">
-        <DialogTitle className="sr-only">Create New Task</DialogTitle>
-        <DialogDescription className="sr-only">Configure a task for this prototype shift.</DialogDescription>
-          <div className="bg-white box-border flex flex-col isolate overflow-clip rounded-[6px] shadow-[0px_2px_12px_0px_rgba(41,46,55,0.1)] max-h-[calc(100vh-4rem)]">
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="box-border flex flex-col gap-[32px] px-[24px] py-[24px]">
-                <p className="new-task-heading font-['DM_Sans'] font-bold text-[#282e38] text-[24px]" style={{ fontVariationSettings: "'opsz' 14" }}>
-                  Create New Task
-                </p>
-
-                {/* Task Class */}
-                <div className="flex flex-col gap-[8px] w-full relative">
-                  <p className="font-['DM_Sans'] font-bold text-[16px] text-slate-500 w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                    Task Class<span className="text-[#d6302d]">*</span>
-                  </p>
-                  <button
-                    type="button"
-                    aria-label="Task class"
-                    aria-expanded={taskClassDropdownOpen}
-                    onClick={() => setTaskClassDropdownOpen(!taskClassDropdownOpen)}
-                    className="bg-white h-[44px] relative rounded-[6px] w-full border border-[#7e8b9d] hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="flex items-center h-full">
-                      <div className="box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
-                        <p className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] text-left" style={{ fontVariationSettings: "'opsz' 14" }}>
-                          {taskClass}
-                        </p>
-                        <div className="size-[24px]">
-                          <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-                            <path d={svgPaths.p18b66300} fill="#282E38" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                  {taskClassDropdownOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setTaskClassDropdownOpen(false)}
-                      />
-                      <div className="absolute top-full left-0 right-0 mt-[4px] z-50 bg-white rounded-[6px] shadow-[0px_2px_12px_0px_#dcdcdd] overflow-hidden">
-                        {taskClassOptions.map((option) => (
-                          <button
-                            key={option}
-                            type="button"
-                            onClick={() => handleTaskClassSelect(option)}
-                            className={`w-full text-left ${
-                              option === taskClass
-                                ? 'bg-[#f1f7ff] border-l-[3px] border-[#0c76d8]'
-                                : 'bg-white hover:bg-slate-50'
-                            }`}
-                          >
-                            <div className="box-border flex gap-[10px] items-center px-[16px] py-[12px]">
-                              <p className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px]" style={{ fontVariationSettings: "'opsz' 14" }}>
-                                {option}
-                              </p>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Select Location */}
-                <div className="flex flex-col gap-[8px] w-full">
-                  <div className="flex flex-col gap-[8px] w-full">
-                    <p className="font-['DM_Sans'] font-bold text-[16px] text-slate-500 w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                      Select Location<span className="text-[#d6302d]">*</span>
-                    </p>
-                    <div className="bg-white h-[44px] relative rounded-[6px] w-full border border-[#7e8b9d]">
-                      <div className="flex items-center h-full">
-                        <div className="box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
-                          <p className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px]" style={{ fontVariationSettings: "'opsz' 14" }}>
-                            {location}
-                          </p>
-                          <div className="size-[24px]">
-                            <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-                              <path d={svgPaths.p18b66300} fill="#282E38" />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="new-task-help font-['DM_Sans'] font-normal text-[#4e535b] text-[18px] w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                    Selecting multiple locations will create one task per location.
-                  </p>
-                </div>
-
-                {/* Standard Duration */}
-                <div className="flex flex-col gap-[8px] w-[231px]">
-                  <p className="font-['DM_Sans'] font-bold text-[16px] text-slate-500 w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                    Standard Duration (min)<span className="text-[#d6302d]">*</span>
-                  </p>
-                  <div className="bg-white h-[44px] relative rounded-[6px] w-full border border-[#7e8b9d]">
-                    <div className="flex items-center h-full">
-                      <div className="box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
-                        <input
-                          type="text"
-                          aria-label="Standard duration in minutes"
-                          value={duration}
-                          onChange={(e) => setDuration(e.target.value)}
-                          className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] bg-transparent border-none outline-none"
-                          style={{ fontVariationSettings: "'opsz' 14" }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Specific Time */}
-                <div className="flex flex-col gap-[8px] w-[231px]">
-                  <p className="font-['DM_Sans'] font-bold text-[16px] text-slate-500 w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                    Specific Time
-                  </p>
-                  <div className="bg-white h-[44px] relative rounded-[6px] w-full border border-[#7e8b9d]">
-                    <div className="flex items-center h-full">
-                      <div className="box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
-                        <input
-                          type="text"
-                          aria-label="Specific time"
-                          value={time}
-                          onChange={(e) => setTime(e.target.value)}
-                          className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] bg-transparent border-none outline-none"
-                          style={{ fontVariationSettings: "'opsz' 14" }}
-                        />
-                        <div className="size-[24px]">
-                          <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-                            <path d={svgPaths.p30e64772} fill="#282E38" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Repeat Details */}
-                <div className="flex flex-col gap-[24px] w-full">
-                  {/* Repeat */}
-                  <div className="flex gap-[10px] items-center">
-                    <div className="flex gap-[8px] items-center">
-                      <div className="font-['DM_Sans'] font-bold text-[16px] text-slate-500 whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Repeat
-                      </div>
-                    </div>
-                    <div className="bg-white box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] rounded-[6px] w-[85px] border border-[#7e8b9d]">
-                      <input
-                        type="text"
-                        aria-label="Times per shift"
-                          value={repeatTimes}
-                        onChange={(e) => setRepeatTimes(e.target.value)}
-                        className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] bg-transparent border-none outline-none"
-                        style={{ fontVariationSettings: "'opsz' 14" }}
-                      />
-                    </div>
-                    <div className="font-['DM_Sans'] font-bold text-[16px] text-center text-slate-500 whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                      times per shift<span className="text-[#d6302d]">*</span>
-                    </div>
-                  </div>
-
-                  {/* Frequency */}
-                  <div className="flex flex-col gap-[8px] w-full">
-                    <p className="font-['DM_Sans'] font-bold text-[16px] text-slate-500 w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                      Frequency<span className="text-[#d6302d]">*</span>
-                    </p>
-                    <div className="bg-white h-[44px] relative rounded-[6px] w-full border border-[#7e8b9d]">
-                      <div className="flex items-center h-full">
-                        <div className="box-border flex gap-[8px] h-[44px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
-                          <p className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px]" style={{ fontVariationSettings: "'opsz' 14" }}>
-                            {frequency}
-                          </p>
-                          <div className="size-[24px]">
-                            <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-                              <path d={svgPaths.p18b66300} fill="#282E38" />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Day Checkboxes */}
-                  <div className="new-task-days" role="group" aria-label="Repeat on days">
-                    {(Object.keys(selectedDays) as (keyof typeof selectedDays)[]).map(day => (
-                      <label className="new-task-day" key={day}>
-                        <input type="checkbox" checked={selectedDays[day]} onChange={() => toggleDay(day)} />
-                        <span>{day.charAt(0).toUpperCase() + day.slice(1)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Notes */}
-                <div className="flex flex-col gap-[8px] w-full">
-                  <p className="font-['DM_Sans'] font-bold text-[16px] text-slate-500 w-full" style={{ fontVariationSettings: "'opsz' 14" }}>
-                    Notes
-                  </p>
-                  <div className="bg-white relative rounded-[6px] w-full border border-[#7e8b9d]">
-                    <div className="flex items-start h-full">
-                      <div className="box-border flex gap-[8px] items-center pl-[16px] pr-[8px] py-[8px] w-full">
-                        <textarea
-                          aria-label="Notes"
-                          value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
-                          className="flex-1 font-['DM_Sans'] font-normal text-[#282e38] text-[18px] bg-transparent border-none outline-none resize-none min-h-[60px]"
-                          style={{ fontVariationSettings: "'opsz' 14" }}
-                          rows={2}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="relative shrink-0 w-full border-t border-[#cccfd4]">
-              <div className="box-border flex flex-wrap gap-[20px] pt-[24px] px-[24px] pb-[24px] w-full">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="flex-1 bg-white h-[44px] min-w-[190px] rounded-[6px] border border-[#003396] hover:bg-slate-50 transition-colors"
-                >
-                  <div className="flex items-center justify-center h-full">
-                    <div className="box-border flex gap-[8px] h-[44px] items-center justify-center px-[16px]">
-                      <p className="font-['DM_Sans'] font-bold text-[#003396] text-[18px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Cancel
-                      </p>
-                    </div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="flex-1 bg-[#003396] h-[44px] min-w-[190px] rounded-[6px] hover:bg-[#002975] transition-colors"
-                >
-                  <div className="flex items-center justify-center h-full">
-                    <div className="box-border flex gap-[8px] h-[44px] items-center justify-center px-[16px]">
-                      <p className="font-['DM_Sans'] font-bold text-white text-[18px] whitespace-nowrap" style={{ fontVariationSettings: "'opsz' 14" }}>
-                        Create New Task
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={handleCancel}
-              aria-label="Close new task"
-              className="new-task-close icon-action"
-            >
-              <X size={16} aria-hidden="true" />
-            </button>
+  return <Dialog open={open} onOpenChange={value => { setError(""); setLocationOpen(false); onOpenChange(value); }}>
+    <DialogContent className="new-task-dialog new-task-functional">
+      <form onSubmit={submit}>
+        <div className="new-task-form-scroll">
+          <DialogTitle className="new-task-heading">Create New Task</DialogTitle>
+          <DialogDescription className="sr-only">Create requests for assignment to an operator.</DialogDescription>
+          <div className="new-task-field">
+            <label id="task-class-label">Task Class <span>*</span></label>
+            <Select value={taskClass} onValueChange={setTaskClass}>
+              <SelectTrigger className="new-task-control" aria-labelledby="task-class-label"><SelectValue /></SelectTrigger>
+              <SelectContent position="popper" className="duty-dialog-select-menu">{taskClasses.map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
-      </DialogContent>
-    </Dialog>
-  );
+          <div className="new-task-field">
+            <label id="task-locations-label">Select Locations <span>*</span></label>
+            <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+              <PopoverTrigger asChild><button type="button" className="new-task-control new-task-location-trigger" aria-labelledby="task-locations-label"><span>{selectedLocations.length ? selectedLocations.join(", ") : "Select locations"}</span><ChevronDown size={16} aria-hidden="true" /></button></PopoverTrigger>
+              <PopoverContent className="new-task-location-menu" align="start" sideOffset={4}>
+                <div role="group" aria-label="Available locations">{locations.map(location => <label className="new-task-day" key={location}><input type="checkbox" checked={selectedLocations.includes(location)} onChange={() => toggleLocation(location)} /><span>{location}</span></label>)}</div>
+              </PopoverContent>
+            </Popover>
+            <p className="new-task-help">Selecting multiple locations will create one task per location.</p>
+          </div>
+          <div className="new-task-field new-task-short-field"><label htmlFor="task-duration">Standard Duration (min) <span>*</span></label><input className="new-task-control" id="task-duration" type="number" min="1" step="1" required value={duration} onChange={event => setDuration(event.target.value)} /></div>
+          <div className="new-task-field new-task-short-field">
+            <label id="task-time-label">Specific Time</label>
+            <Select value={time || "none"} onValueChange={value => setTime(value === "none" ? "" : value)}>
+              <SelectTrigger className="new-task-control" aria-labelledby="task-time-label"><SelectValue /></SelectTrigger>
+              <SelectContent position="popper" className="duty-dialog-select-menu">
+                <SelectItem value="none">No specific time</SelectItem>
+                {timeOptions.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="new-task-repeat"><label htmlFor="task-repeat">Repeat</label><input className="new-task-control" id="task-repeat" aria-label="Times per shift" type="number" min="1" step="1" required value={repeatTimes} onChange={event => setRepeatTimes(event.target.value)} /><span>times per shift <span aria-hidden="true">*</span></span></div>
+          <div className="new-task-field"><label id="task-frequency-label">Frequency <span>*</span></label>
+            <Select value={frequency} onValueChange={value => setFrequency(value as "specific" | "all")}><SelectTrigger className="new-task-control" aria-labelledby="task-frequency-label"><SelectValue /></SelectTrigger><SelectContent position="popper" className="duty-dialog-select-menu"><SelectItem value="specific">Specific Days</SelectItem><SelectItem value="all">All Days</SelectItem></SelectContent></Select>
+          </div>
+          {frequency === "specific" && <div className="new-task-days" role="group" aria-label="Repeat on days">{days.map(day => <label className="new-task-day" key={day}><input type="checkbox" checked={selectedDays.includes(day)} onChange={() => toggleDay(day)} /><span>{day}</span></label>)}</div>}
+          <div className="new-task-field"><label htmlFor="task-notes">Notes</label><textarea className="new-task-control" id="task-notes" rows={3} value={notes} onChange={event => setNotes(event.target.value)} /></div>
+          {error && <p className="new-task-error" role="alert">{error}</p>}
+        </div>
+        <footer className="new-task-form-footer"><button className="secondary-action" type="button" onClick={() => onOpenChange(false)}>Cancel</button><button className="primary-action" type="submit">Create New Task</button></footer>
+        <button type="button" aria-label="Close new task" className="new-task-close icon-action" onClick={() => onOpenChange(false)}><X size={16} aria-hidden="true" /></button>
+      </form>
+    </DialogContent>
+  </Dialog>;
 }

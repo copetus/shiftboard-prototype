@@ -1,3 +1,4 @@
+import type { TaskRequest } from "../data/taskRequests";
 import type { TaskAssignment } from "../lib/assignOperatorTasks";
 import { useRef, useState } from "react";
 import { MapPin, MoreVertical, Coffee, Sandwich } from "lucide-react";
@@ -9,6 +10,7 @@ import { CancelDutyListModal } from "./CancelDutyListModal";
 import { ReassignDutyListModal } from "./ReassignDutyListModal";
 
 export interface EmployeeTaskData {
+  assignedTaskIds?: string[];
   estimatedWorkMinutes?: number;
   shiftId?: string;
   name: string;
@@ -26,6 +28,7 @@ export interface EmployeeTaskData {
 
 interface EmployeeTaskCardProps {
   employee: EmployeeTaskData;
+  taskRequests: TaskRequest[];
   isToday?: boolean;
   area?: "main" | "northWest" | "south";
   onAssignTasks: (employeeName: string, area: "main" | "northWest" | "south", shiftId: string | undefined, tasks: TaskAssignment[]) => void;
@@ -55,7 +58,7 @@ const workStatusConfig = {
   },
 };
 
-export function EmployeeTaskCard({ employee, isToday = true, area = "main", onCancelDutyLists, onAssignTasks }: EmployeeTaskCardProps) {
+export function EmployeeTaskCard({ employee, isToday = true, area = "main", onCancelDutyLists, onAssignTasks, taskRequests }: EmployeeTaskCardProps) {
   const actionTriggerRef = useRef<HTMLButtonElement>(null);
   const [assignPanelOpen, setAssignPanelOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -176,7 +179,7 @@ export function EmployeeTaskCard({ employee, isToday = true, area = "main", onCa
         </div>
       </div>
 
-      <AssignTaskPanel open={assignPanelOpen} onOpenChange={setAssignPanelOpen} operatorName={employee.name} role={employee.role} location={employee.location} shiftId={employee.shiftId} assignedTasks={allTags} onAssign={tasks => onAssignTasks(employee.name, area, employee.shiftId, tasks)} onCloseFocus={() => actionTriggerRef.current?.focus()} />
+      <AssignTaskPanel open={assignPanelOpen} onOpenChange={setAssignPanelOpen} operatorName={employee.name} role={employee.role} location={employee.location} shiftId={employee.shiftId} assignedTasks={allTags} assignedTaskIds={employee.assignedTaskIds || []} tasks={taskRequests} onAssign={tasks => onAssignTasks(employee.name, area, employee.shiftId, tasks)} onCloseFocus={() => actionTriggerRef.current?.focus()} />
 
       {/* Cancel Duty List Modal */}
       <CancelDutyListModal

@@ -1,3 +1,4 @@
+import { initialTaskRequests, createTaskRequests, type NewTaskDraft } from "./data/taskRequests";
 import { assignOperatorTasks, type TaskAssignment } from "./lib/assignOperatorTasks";
 import { useState, useEffect } from "react";
 import { TopNav } from "./components/TopNav";
@@ -13,10 +14,16 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner@2.0.3";
 
 export default function App() {
+  const [taskRequests, setTaskRequests] = useState(initialTaskRequests);
+  const handleCreateTask = (draft: NewTaskDraft) => {
+    const created = createTaskRequests(draft);
+    setTaskRequests(previous => [...created, ...previous]);
+    toast.success(`Created ${created.length} ${created.length === 1 ? "task" : "tasks"}`, { description: "Available in Requests for assignment." });
+  };
   const [newTaskDialogOpen, setNewTaskDialogOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState("2024-10-14");
   const [currentShifts, setCurrentShifts] = useState(["shift1", "shift2"]);
-  const [employeeData, setEmployeeData] = useState(() => 
+  const [employeeData, setEmployeeData] = useState(() =>
     getEmployeesForDateAndShifts("2024-10-14", ["shift1", "shift2"])
   );
   const allStatusValues: OperatorStatusValue[] = ["in-progress", "on-break", "meal-break", "inactive", "idle"];
@@ -55,7 +62,7 @@ export default function App() {
                 // Random increment between 1-3%
                 const increment = Math.floor(Math.random() * 3) + 1;
                 newProgress = Math.min(100, newProgress + increment);
-                
+
                 // When reaching 100%, change to idle
                 if (newProgress === 100) {
                   newOperatorStatus = "idle";
@@ -98,14 +105,6 @@ export default function App() {
     setEmployeeData(getEmployeesForDateAndShifts(date, shifts));
   };
 
-  const handleShiftRemove = (shiftId: string) => {
-    // Don't allow removing if it's the only shift
-    if (currentShifts.length === 1) return;
-    
-    const newShifts = currentShifts.filter(id => id !== shiftId);
-    handleDateShiftChange(currentDate, newShifts);
-  };
-
   const handleStatusChange = (statuses: OperatorStatusValue[]) => {
     setSelectedStatuses(statuses);
   };
@@ -117,6 +116,7 @@ export default function App() {
         ? assignOperatorTasks(employee, tasks)
         : employee),
     }));
+    setTaskRequests(previous => previous.map(task => tasks.some(assigned => assigned.id === task.id) ? { ...task, assigned: true } : task));
     toast.success(`Assigned ${tasks.length} ${tasks.length === 1 ? "task" : "tasks"} to ${employeeName}`, { description: tasks.map(task => task.name).join(", ") });
   };
 
@@ -262,10 +262,9 @@ export default function App() {
         {/* Main Content Area */}
         <main id="main-content" className="main-content" tabIndex={-1}>
           {/* Shift Header */}
-          <ShiftHeader 
-            onNewTask={() => setNewTaskDialogOpen(true)} 
+          <ShiftHeader
+            onNewTask={() => setNewTaskDialogOpen(true)}
             onDateShiftChange={handleDateShiftChange}
-            onShiftRemove={handleShiftRemove}
             currentDate={currentDate}
             currentShifts={currentShifts}
           />
@@ -273,16 +272,16 @@ export default function App() {
           {/* Content - Add top padding to account for fixed header */}
           <div className="board-content">
             {/* Task Summary */}
-            <TaskSummary 
-              employeeData={employeeData} 
-              isToday={isToday} 
+            <TaskSummary
+              employeeData={employeeData}
+              isToday={isToday}
               isYesterday={isYesterday}
               isTomorrow={isTomorrow}
               isDayAfterTomorrow={isDayAfterTomorrow}
             />
 
             {/* Filters */}
-            <FilterBar 
+            <FilterBar
               selectedStatuses={selectedStatuses}
               onStatusChange={handleStatusChange}
               searchQuery={searchQuery}
@@ -298,13 +297,14 @@ export default function App() {
                           <h2 className="area-title" style={{ fontVariationSettings: "'opsz' 14" }}>
                             Main <span>{filteredEmployeeData.main.length} operators</span>
                           </h2>
-                          
+
                           {/* Responsive Grid: 3 on desktop, 2 on tablet, 1 on mobile */}
                           <div className="operator-grid">
                             {filteredEmployeeData.main.map((employee) => (
-                              <EmployeeTaskCard 
-                                key={`main-${employee.name}`} 
-                                employee={employee} 
+                              <EmployeeTaskCard
+                                key={`main-${employee.name}`}
+                                employee={employee}
+                                taskRequests={taskRequests}
                                 isToday={isToday}
                                 area="main"
                                 onAssignTasks={handleAssignTasks}
@@ -321,12 +321,13 @@ export default function App() {
                           <h2 className="area-title" style={{ fontVariationSettings: "'opsz' 14" }}>
                             North West <span>{filteredEmployeeData.northWest.length} operators</span>
                           </h2>
-                          
+
                           <div className="operator-grid">
                             {filteredEmployeeData.northWest.map((employee) => (
-                              <EmployeeTaskCard 
-                                key={`nw-${employee.name}`} 
-                                employee={employee} 
+                              <EmployeeTaskCard
+                                key={`nw-${employee.name}`}
+                                employee={employee}
+                                taskRequests={taskRequests}
                                 isToday={isToday}
                                 area="northWest"
                                 onAssignTasks={handleAssignTasks}
@@ -343,12 +344,13 @@ export default function App() {
                           <h2 className="area-title" style={{ fontVariationSettings: "'opsz' 14" }}>
                             South <span>{filteredEmployeeData.south.length} operators</span>
                           </h2>
-                          
+
                           <div className="operator-grid">
                             {filteredEmployeeData.south.map((employee) => (
-                              <EmployeeTaskCard 
-                                key={`south-${employee.name}`} 
-                                employee={employee} 
+                              <EmployeeTaskCard
+                                key={`south-${employee.name}`}
+                                employee={employee}
+                                taskRequests={taskRequests}
                                 isToday={isToday}
                                 area="south"
                                 onAssignTasks={handleAssignTasks}
@@ -378,7 +380,7 @@ export default function App() {
       </div>
 
       {/* New Task Dialog */}
-      <NewTaskDialog open={newTaskDialogOpen} onOpenChange={setNewTaskDialogOpen} />
+      <NewTaskDialog onCreate={handleCreateTask} open={newTaskDialogOpen} onOpenChange={setNewTaskDialogOpen} />
 
       {/* Toast Notifications */}
       <Toaster />
